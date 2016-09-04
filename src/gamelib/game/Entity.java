@@ -563,7 +563,7 @@ public abstract class Entity {
 	 * @return the location
 	 */
 	public PVector getLocation(){
-		return location.get();
+		return location.copy();
 	}
 
 	/**
@@ -619,7 +619,7 @@ public abstract class Entity {
 	 * @return the velocity
 	 */
 	public PVector getVelocity(){
-		return velocity.get();
+		return velocity.copy();
 	}
 
 	/**
@@ -659,7 +659,7 @@ public abstract class Entity {
 	 * @return the rotation
 	 */
 	public PVector getRotation3D(){
-		return rotation.get();
+		return rotation.copy();
 	}
 
 	/**
@@ -691,7 +691,7 @@ public abstract class Entity {
 	 * @return The scale
 	 */
 	public PVector getScale(){
-		return scale.get();
+		return scale.copy();
 	}
 	
 	/**
@@ -1073,7 +1073,7 @@ public abstract class Entity {
 			return;
 		}
 		if(minLocation == null){
-			minLocation = min.get();
+			minLocation = min.copy();
 		}
 		else{
 			minLocation.set(min);
@@ -1112,7 +1112,7 @@ public abstract class Entity {
 			return;
 		}
 		if(maxLocation == null){
-			maxLocation = max.get();
+			maxLocation = max.copy();
 		}
 		else{
 			maxLocation.set(max);
@@ -1151,7 +1151,7 @@ public abstract class Entity {
 			return;
 		}
 		if(minVelocity == null){
-			minVelocity = min.get();
+			minVelocity = min.copy();
 		}
 		else{
 			minVelocity.set(min);
@@ -1190,7 +1190,7 @@ public abstract class Entity {
 			return;
 		}
 		if(maxVelocity == null){
-			maxVelocity = max.get();
+			maxVelocity = max.copy();
 		}
 		else{
 			maxVelocity.set(max);
@@ -1232,7 +1232,7 @@ public abstract class Entity {
 			return;
 		}
 		if(minRotation == null){
-			minRotation = min.get();
+			minRotation = min.copy();
 		}
 		else{
 			minRotation.set(min);
@@ -1270,7 +1270,7 @@ public abstract class Entity {
 			return;
 		}
 		if(maxRotation == null){
-			maxRotation = max.get();
+			maxRotation = max.copy();
 		}
 		else{
 			maxRotation.set(max);
@@ -1389,7 +1389,7 @@ public abstract class Entity {
 			velocity.z = Math.min(velocity.z, maxVelocity.z);
 		}
 		if(!Float.isNaN(maxHorizontalVelocity)){
-			PVector temp = velocity.get();
+			PVector temp = velocity.copy();
 			temp.y = 0;
 			if(temp.mag() > maxHorizontalVelocity){
 				temp.normalize();

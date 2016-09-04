@@ -106,7 +106,7 @@ public abstract class Light {
 	 * @return the location
 	 */
 	public PVector getLocation(){
-		return location.get();
+		return location.copy();
 	}
 
 	/**
@@ -138,7 +138,7 @@ public abstract class Light {
 	 * @return the velocity
 	 */
 	public PVector getVelocity(){
-		return velocity.get();
+		return velocity.copy();
 	}
 
 	/**
@@ -178,7 +178,7 @@ public abstract class Light {
 	 * @return the rotation
 	 */
 	public PVector getRotation3D(){
-		return rotation.get();
+		return rotation.copy();
 	}
 
 	/**
@@ -210,7 +210,7 @@ public abstract class Light {
 	 * @return The scale
 	 */
 	public PVector getScale(){
-		return scale.get();
+		return scale.copy();
 	}
 	
 	/**

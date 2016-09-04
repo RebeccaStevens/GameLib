@@ -20,8 +20,8 @@ public class CameraStatic extends Camera {
 
 	public CameraStatic(Level level, PVector location, PVector rotation){
 		super(level);
-		this.location = location.get();
-		this.rotation = rotation.get();
+		this.location = location.copy();
+		this.rotation = rotation.copy();
 	}
 
 	@Override
