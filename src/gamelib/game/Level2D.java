@@ -39,7 +39,7 @@ public abstract class Level2D extends Level {
 	}
 
 	@Override
-	public boolean is3D() {
+	public final boolean is3D() {
 		return false;
 	}
 }

@@ -1,7 +1,7 @@
 package gamelib.game;
 
 import gamelib.GameManager;
-import processing.core.PApplet;
+import gamelib.scenes.GameScene;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
@@ -41,12 +41,10 @@ public abstract class Camera {
 	}
 
 	private void apply2D(PGraphics g){
-		// TODO change camera mode to use positive y as down
-		PApplet sketch = GameManager.getMe().getSketch();
-		g.translate(sketch.width/2, sketch.height/2);
+		GameScene gs = GameManager.getMe().getGameScene();
+		g.translate(gs.getGameWidth() / 2, gs.getGameHeight() / 2);
 		g.rotate(rotation.x);
-		g.scale(1, -1);
-		g.translate(-2*location.x, -2*location.y);
+		g.translate(-location.x, -location.y);
 		g.scale(scale.x, scale.y);
 	}
 	
@@ -56,5 +54,40 @@ public abstract class Camera {
 	
 	public final Level getLevel(){
 		return level;
+	}
+
+	/**
+	 * Get the x location of this camera.
+	 * 
+	 * @return the x location
+	 */
+	public float getX(){
+		return location.x;
+	}
+
+	/**
+	 * Get the y location of this camera.
+	 * 
+	 * @return the y location
+	 */
+	public float getY(){
+		return location.y;
+	}
+
+	/**
+	 * Get the z location of this camera.
+	 * 
+	 * @return the z location
+	 */
+	public float getZ(){
+		return location.z;
+	}
+
+	/**
+	 * Get the location of this entity.
+	 * @return the location
+	 */
+	public PVector getLocation(){
+		return location.copy();
 	}
 }

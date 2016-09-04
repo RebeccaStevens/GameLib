@@ -10,7 +10,7 @@ public abstract class Level3D extends Level {
 	}
 
 	@Override
-	public boolean is3D() {
+	public final boolean is3D() {
 		return true;
 	}
 }

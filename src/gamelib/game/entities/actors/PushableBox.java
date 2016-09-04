@@ -39,21 +39,21 @@ public class PushableBox extends PushableEntity {
 	}
 
 	@Override
-	public void draw(PGraphics g, float delta) {
+	public void draw(PGraphics g) {
 		if(getLevel().is3D()){
-			draw3D(g, delta);
+			draw3D(g);
 		}
 		else{
-			draw2D(g, delta);
+			draw2D(g);
 		}
 	}
 	
-	private void draw2D(PGraphics g, float delta) {
+	private void draw2D(PGraphics g) {
 		style.apply(g);
 		g.rect(0, 0, getWidth(), getHeight());
 	}
 	
-	private void draw3D(PGraphics g, float delta) {
+	private void draw3D(PGraphics g) {
 		style.apply(g);
 		g.box(getWidth(), getHeight(), getDepth());
 	}

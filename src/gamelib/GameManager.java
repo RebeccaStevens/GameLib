@@ -1,17 +1,18 @@
 package gamelib;
 
-import gamelib.game.Level;
+import gamelib.scenes.GameScene;
+import gamelib.scenes.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import processing.event.KeyEvent;
 
-public class GameManager {
+public final class GameManager {
 	
 	private static GameManager me;
 	
 	private PApplet sketch;
 	private Time time;
-	private Level activeLevel;
+	private Scene activeScene;
+	private GameScene gameScene;
 
 	private Background background;
 
@@ -23,33 +24,26 @@ public class GameManager {
 		}
 		
 		this.sketch = sketch;
-		me = this;
-		time = new Time(sketch);
-		background = new Background(0xFF2277FF);
+		GameManager.me = this;
+		this.time = new Time();
+		this.background = new Background(0xFF2277FF);
+		this.gameScene = new GameScene();
+		setActiveScene(this.gameScene);
 		
 		sketch.registerMethod("pre", this);
-		sketch.registerMethod("keyEvent", this);
 	}
 	
 	public void pre(){
-		if(autoDraw){
+		if(this.autoDraw){
 			update();
 			draw();
 		}
 	}
 	
-	public Level getActiveLevel() {
-		return activeLevel;
-	}
-	
-	public void setActiveLevel(Level level){
-		activeLevel = level;
-	}
-	
 	public void update(){
-		Time.update(sketch);
-		if(activeLevel != null){
-			activeLevel.update(Time.getTimeStep());
+		time.update();
+		if(this.activeScene != null){
+			this.activeScene.update(time.getTimeStep());
 		}
 	}
 	
@@ -57,52 +51,47 @@ public class GameManager {
 		draw(getGraphics());
 	}
 
-	private void draw(PGraphics g) {
+	public void draw(PGraphics g) {
 		g.pushStyle();
 		g.rectMode(PApplet.CENTER);
 		g.ellipseMode(PApplet.CENTER);
 		g.imageMode(PApplet.CENTER);
-		if(activeLevel != null){
-			background.draw(g);
-			activeLevel.display(g);
+		if (this.activeScene != null) {
+			this.background.draw(g);
+			this.activeScene.draw(g);
 		}
 		g.popStyle();
-		if(activeLevel != null){
-			g.pushStyle();
-			activeLevel.draw(g);
-			g.popStyle();
-		}
-	}
-
-	public void keyEvent(KeyEvent e){
-		switch(e.getAction()){
-			case KeyEvent.PRESS:	keyPressed(e);	break;
-			case KeyEvent.RELEASE:	keyReleased(e);	break;
-		}
-	}
-
-	private void keyPressed(KeyEvent e){
-		for(Key key : Key.keys){
-			key.update(e.getKeyCode(), true);
-		}
-	}
-
-	private void keyReleased(KeyEvent e){
-		for(Key key : Key.keys){
-			key.update(e.getKeyCode(), false);
-		}
 	}
 	
 	public PApplet getSketch(){
-		return sketch;
+		return this.sketch;
+	}
+
+	public Scene getActiveScene() {
+		return this.activeScene;
+	}
+
+	public void setActiveScene(Scene scene) {
+		if (this.activeScene != null) {
+			this.activeScene.leave();
+		}
+		this.activeScene = scene;
+		this.activeScene.enter();
+	}
+
+	/**
+	 * @return the gameScene
+	 */
+	public GameScene getGameScene() {
+		return gameScene;
 	}
 
 	public Time getTime(){
-		return time;
+		return this.time;
 	}
 	
 	public void setAutoDraw(boolean b){
-		this.autoDraw  = b;
+		this.autoDraw = b;
 	}
 	
 	/**

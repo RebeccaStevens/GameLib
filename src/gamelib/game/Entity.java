@@ -1,16 +1,17 @@
 package gamelib.game;
 
-import gamelib.Time;
-import gamelib.game.entities.PushableEntity;
-
 import java.util.HashSet;
 import java.util.Set;
 
+import gamelib.Drawable;
+import gamelib.GameManager;
+import gamelib.Updatable;
+import gamelib.game.entities.PushableEntity;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
-public abstract class Entity {
+public abstract class Entity implements Updatable, Drawable {
 	
 	private PVector location;
 	private PVector velocity;
@@ -22,7 +23,7 @@ public abstract class Entity {
 	private PVector maxLocation, minLocation;
 	private PVector maxVelocity, minVelocity;
 	private PVector maxRotation, minRotation;
-	private float maxHorizontalVelocity;
+	private float maxHorizontalVelocity = Float.NaN;
 	
 	private BoundingBox boundingBox;
 	
@@ -52,7 +53,7 @@ public abstract class Entity {
 	 * @param height The height
 	 */
 	public Entity(Level level, float x, float y, float width, float height){
-		this(level, x, y, 0, width, 1, height);
+		this(level, x, y, 0, width, height, 0);
 	}
 	
 	/**
@@ -90,14 +91,22 @@ public abstract class Entity {
 	 */
 	public Entity(Level level, float x, float y, float z, float width, float height, float depth){
 		setLevel(level);
-		location = new PVector(x, y, z);
+		location = new PVector(
+				level.convertGridUnitsXToPixels(x),
+				level.convertGridUnitsYToPixels(y),
+				level.convertGridUnitsZToPixels(z));
 		velocity = new PVector();
 		rotation = new PVector();
 		if(level.is3D()){
-			boundingBox = new BoundingBox3D(this, width, height, depth);
+			boundingBox = new BoundingBox3D(this,
+					level.convertGridUnitsWidthToPixels(width),
+					level.convertGridUnitsHeightToPixels(height),
+					level.convertGridUnitsDepthToPixels(depth));
 		}
 		else{
-			boundingBox = new BoundingBox2D(this, width, height);
+			boundingBox = new BoundingBox2D(this,
+					level.convertGridUnitsWidthToPixels(width),
+					level.convertGridUnitsHeightToPixels(height));
 		}
 		scale = new PVector(1, 1, 1);
 		
@@ -253,7 +262,10 @@ public abstract class Entity {
 		this.moveNow(newLocation, dLocation);
 		
 		this.velocity.mult(1-resistance);
-		((Entity)(pushee)).velocity.add(this.velocity);
+		((Entity)(pushee)).velocity.add(
+				this.level.convertGridUnitsVelocityXToPixels(this.velocity.x),
+				this.level.convertGridUnitsVelocityYToPixels(this.velocity.y),
+				this.level.convertGridUnitsVelocityZToPixels(this.velocity.z));
 		
 		return true;
 	}
@@ -273,7 +285,10 @@ public abstract class Entity {
 			applyAcceleration(0, 0, 0, ground.getGroundFriction());
 		}
 		
-		return PVector.add(location, PVector.mult(velocity, (float) delta));
+		return PVector.add(location, new PVector(
+				this.level.convertGridUnitsVelocityXToPixels(this.velocity.x) * delta,
+				this.level.convertGridUnitsVelocityYToPixels(this.velocity.y) * delta,
+				this.level.convertGridUnitsVelocityZToPixels(this.velocity.z) * delta));
 	}
 	
 	/**
@@ -281,7 +296,7 @@ public abstract class Entity {
 	 * This method calls the method: draw(delta)
 	 * @param g The graphics object to draw to
 	 */
-	final void draw(PGraphics g){
+	final void _draw(PGraphics g){
 		if(this.level == null) return;
 		g.pushMatrix();
 		if(level.is3D()){
@@ -297,8 +312,7 @@ public abstract class Entity {
 			g.scale(scale.x, scale.y);
 		}
 		g.pushStyle();
-		g.noStroke();
-		draw(g, Time.getTimeStep());
+		draw(g);
 		g.popStyle();
 		g.pushStyle();
 		if(level.isDrawBoundingBoxes()){
@@ -307,12 +321,6 @@ public abstract class Entity {
 		g.popStyle();
 		g.popMatrix();
 	}
-	
-	/**
-	 * Draw the entity.
-	 * @param delta The amount of game time that has passed since the last frame
-	 */
-	public abstract void draw(PGraphics g, float delta);
 
 	/**
 	 * Draw a bounding box around the entity.
@@ -477,18 +485,18 @@ public abstract class Entity {
 	 */
 	public static PVector accelerate(PVector velocity, PVector acceleration, float friction){
 		PVector delta;
-		float time_step = Time.getTimeStep();
+		float time_step = GameManager.getMe().getTime().getTimeStep();
 
-		  if (friction == 0) {
-		    delta = PVector.add(PVector.mult(velocity, (float) time_step), PVector.mult(acceleration, (float) (0.5F * time_step * time_step)));
-		    velocity.add(PVector.mult(acceleration, (float) time_step));
-		  } 
-		  else {
-		    delta = PVector.add(PVector.mult(acceleration, (float) (time_step / friction)), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) ((1 - Math.exp(-friction * time_step)) / friction)));
-		    velocity.set(PVector.add(PVector.div(acceleration, friction), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) Math.exp(-friction * time_step))));
-		  }
-		  
-		  return delta;
+		if (friction == 0) {
+			delta = PVector.add(PVector.mult(velocity, (float) time_step), PVector.mult(acceleration, (float) (0.5F * time_step * time_step)));
+			velocity.add(PVector.mult(acceleration, (float) time_step));
+		}
+		else {
+			delta = PVector.add(PVector.mult(acceleration, (float) (time_step / friction)), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) ((1 - Math.exp(-friction * time_step)) / friction)));
+			velocity.set(PVector.add(PVector.div(acceleration, friction), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) Math.exp(-friction * time_step))));
+		}
+		
+		return delta;
 	}
 	
 	public void attach(Entity entity){

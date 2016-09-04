@@ -1,11 +1,11 @@
 package gamelib.game;
 
-import gamelib.GameManager;
-import gamelib.game.cameras.CameraStatic;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import gamelib.GameManager;
+import gamelib.game.cameras.CameraStatic;
+import gamelib.scenes.GameScene;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
@@ -19,9 +19,15 @@ public abstract class Level {
 	private Camera camera;
 	
 	private boolean drawBoundingBoxes;
+	private boolean drawGrid;
+	
+	private final int gridWidth;
+	private int gridHeight;
 	
 	private PVector gravity;
 	private float airFriction;
+	
+	private float zoom = 1;
 	
 	/**
 	 * Create a level with a static camera
@@ -31,22 +37,35 @@ public abstract class Level {
 	}
 	
 	/**
-	 * Create a level with the given camera
+	 * Create a level with the given camera.
+	 * 
 	 * @param camera
 	 */
 	public Level(Camera camera){
-		entities = new ArrayList<Entity>();
-		entitiesToRemove = new ArrayList<Entity>();
-		dLights = new ArrayList<DynamicLight>();
-		lights = new ArrayList<Light>();
-		if(camera == null){
+		this(null, 16);
+	}
+	
+	/**
+	 * Create a level.
+	 * 
+	 * @param camera - The camera to use
+	 * @param gridWidth - Set the scale of the grid
+	 */
+	public Level(Camera camera, int gridWidth){
+		this.entities = new ArrayList<Entity>();
+		this.entitiesToRemove = new ArrayList<Entity>();
+		this.dLights = new ArrayList<DynamicLight>();
+		this.lights = new ArrayList<Light>();
+		
+		if (camera == null) {
 			this.camera = new CameraStatic(this);
-		}
-		else{
+		} else {
 			this.camera = camera;
 		}
-		gravity = new PVector();
-		airFriction = 0;
+		this.gravity = new PVector();
+		this.airFriction = 0;
+		this.gridWidth = 16;
+		updateGrid();
 	}
 	
 	/**
@@ -65,26 +84,64 @@ public abstract class Level {
 	}
 
 	/**
-	 * Display the level.
+	 * Draw the level.
+	 * 
 	 * @param g The graphics to draw to
 	 */
-	public void display(PGraphics g) {
+	public final void draw(PGraphics g) {
 		g.pushMatrix();
-		camera.apply(g);
-		for(Light l : lights){
+		this.camera.apply(g);
+		for(Light l : this.lights){
 			l.apply(g);
 		}
-		for(Entity e : entities){
-			e.draw(g);
+		for(Entity e : this.entities){
+			e._draw(g);
 		}
 		g.popMatrix();
+		
+		if (this.drawGrid) {
+			drawGrid(g);
+		}
+	}
+	
+	/**
+	 * Draw the grid.
+	 * 
+	 * @param g
+	 */
+	private void drawGrid(PGraphics g) {
+		g.pushStyle();
+		
+		g.stroke(0x33000000); // black transparent lines	
+		g.strokeWeight(1);
+		
+		float xOffset = (this.camera.getX() * this.gridWidth / g.width) % 1;
+		float yOffset = (this.camera.getY() * this.gridHeight / g.height) % 1;
+		
+		// draw the vertical lines
+		for (int i = 0; i < gridWidth / this.zoom + 1; i++) {
+			g.line((i - xOffset) * this.zoom * g.width / this.gridWidth, 0, (i - xOffset) * this.zoom * g.width / this.gridWidth, g.height);
+		}
+		
+		// draw the horizontal lines
+		for (int i = 0; i < gridHeight / this.zoom + 1; i++) {
+			g.line(0, g.height - ((i + yOffset) * this.zoom * g.height / this.gridHeight), g.width, g.height - ((i + yOffset) * this.zoom * g.height / this.gridHeight));
+		}
+		
+		g.popStyle();
 	}
 
 	/**
-	 * Draw the level.
+	 * Draw the level's background.
 	 * @param g The graphics to draw to
 	 */
-	public abstract void draw(PGraphics g);
+	public abstract void drawBackground(PGraphics g);
+
+	/**
+	 * Draw the level overlay.
+	 * @param g The graphics to draw to
+	 */
+	public abstract void drawOverlay(PGraphics g);
 
 	/**
 	 * Add an entity to the level.
@@ -190,6 +247,15 @@ public abstract class Level {
 	}
 
 	/**
+	 * Get whether or not the grid should be drawn.
+	 * 
+	 * @return
+	 */
+	public final boolean isDrawGrid(){
+		return this.drawGrid;
+	}
+
+	/**
 	 * Set the amount of air friction in the level.
 	 * @param airFriction
 	 */
@@ -241,6 +307,15 @@ public abstract class Level {
 	public final void setDrawBoundingBoxes(boolean b){
 		drawBoundingBoxes = b;
 	}
+	
+	/**
+	 * Set whether or not to draw the level grid.
+	 * 
+	 * @param b
+	 */
+	public final void setDrawGrid(boolean b){
+		this.drawGrid = b;
+	}
 
 	/**
 	 * Remove an entity from the level.
@@ -262,7 +337,7 @@ public abstract class Level {
 	 * Make this the active level
 	 */
 	public final void makeActive(){
-		GameManager.getMe().setActiveLevel(this);
+		GameManager.getMe().getGameScene().setActiveLevel(this);
 	}
 	
 	/**
@@ -286,5 +361,104 @@ public abstract class Level {
 		default:
 			return false;
 		}
+	}
+
+	/**
+	 * Update the size of the grid.
+	 */
+	private void updateGrid() {
+		GameScene gs = GameManager.getMe().getGameScene();
+		
+		this.gridHeight = (int) (this.gridWidth * gs.getGameHeight() / (double) gs.getGameWidth());
+	}
+	
+	/**
+	 * Convert game units (for x position) to pixels.
+	 * 
+	 * @param gameUnits
+	 * @return
+	 */
+	float convertGridUnitsXToPixels(float gameUnits) {
+		return this.zoom * gameUnits * GameManager.getMe().getGameScene().getGameWidth() / this.gridWidth;
+	}
+	
+	/**
+	 * Convert game units (for y position) to pixels.
+	 * 
+	 * @param gameUnits
+	 * @return
+	 */
+	float convertGridUnitsYToPixels(float gameUnits) {
+		return GameManager.getMe().getGameScene().getGameHeight() - (this.zoom * gameUnits * GameManager.getMe().getGameScene().getGameHeight() / this.gridHeight);
+	}
+	
+	/**
+	 * Convert game units (for z position) to pixels.
+	 * 
+	 * @param gameUnits
+	 * @return
+	 */
+	float convertGridUnitsZToPixels(float gameUnits) {
+		return convertGridUnitsXToPixels(gameUnits);
+	}
+	
+	/**
+	 * Convert game units (for x movement) to pixels.
+	 * 
+	 * @param gameUnits
+	 * @return
+	 */
+	float convertGridUnitsVelocityXToPixels(float gameUnits) {
+		return this.zoom * gameUnits * GameManager.getMe().getGameScene().getGameWidth() / this.gridWidth;
+	}
+	
+	/**
+	 * Convert game units (for y movement) to pixels.
+	 * 
+	 * @param gameUnits
+	 * @return
+	 */
+	float convertGridUnitsVelocityYToPixels(float gameUnits) {
+		return -(this.zoom * gameUnits * GameManager.getMe().getGameScene().getGameHeight() / this.gridHeight);
+	}
+	
+	/**
+	 * Convert game units (for z movement) to pixels.
+	 * 
+	 * @param gameUnits
+	 * @return
+	 */
+	float convertGridUnitsVelocityZToPixels(float gameUnits) {
+		return convertGridUnitsVelocityXToPixels(gameUnits);
+	}
+
+	/**
+	 * Convert game units (for width) to pixels.
+	 * 
+	 * @param gameUnits
+	 * @return
+	 */
+	float convertGridUnitsWidthToPixels(float gameUnits) {
+		return this.zoom * gameUnits * GameManager.getMe().getGameScene().getGameWidth() / this.gridWidth;
+	}
+
+	/**
+	 * Convert game units (for height) to pixels.
+	 * 
+	 * @param gameUnits
+	 * @return
+	 */
+	float convertGridUnitsHeightToPixels(float gameUnits) {
+		return this.zoom * gameUnits * GameManager.getMe().getGameScene().getGameHeight() / this.gridHeight;
+	}
+
+	/**
+	 * Convert game units (for depth) to pixels.
+	 * 
+	 * @param gameUnits
+	 * @return
+	 */
+	float convertGridUnitsDepthToPixels(float gameUnits) {
+		return convertGridUnitsWidthToPixels(gameUnits);
 	}
 }
