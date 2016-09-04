@@ -13,7 +13,6 @@ public interface Drawable {
 	 * Draw me.
 	 * 
 	 * @param g - The graphics object to draw to
-	 * @param delta - The amount of game time that has passed since the last frame
 	 */
-	public void draw(PGraphics g, float delta);
+	public void draw(PGraphics g);
 }
