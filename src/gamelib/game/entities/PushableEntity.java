@@ -2,6 +2,7 @@ package gamelib.game.entities;
 
 import gamelib.game.Entity;
 import gamelib.game.Level;
+import processing.core.PConstants;
 import processing.core.PVector;
 
 public abstract class PushableEntity extends Entity {
@@ -17,7 +18,7 @@ public abstract class PushableEntity extends Entity {
 	 * @param height The height
 	 */
 	public PushableEntity(Level level, float x, float y, float width, float height, float resistance){
-		super(level, x, y, width, height);
+		super(level, x, y, width, height, PConstants.CENTER);
 		init(resistance);
 	}
 	
@@ -29,7 +30,7 @@ public abstract class PushableEntity extends Entity {
 	 * @param height The height
 	 */
 	public PushableEntity(Level level, PVector location, float width, float height, float resistance){
-		super(level, location, width, height);
+		super(level, location, width, height, PConstants.CENTER);
 		init(resistance);
 	}
 	
@@ -42,7 +43,7 @@ public abstract class PushableEntity extends Entity {
 	 * @param depth The depth
 	 */
 	public PushableEntity(Level level, PVector location, float width, float height, float depth, float resistance){
-		super(level, location, width, height, depth);
+		super(level, location, width, height, depth, PConstants.CENTER);
 		init(resistance);
 	}
 	
@@ -57,7 +58,7 @@ public abstract class PushableEntity extends Entity {
 	 * @param depth The depth
 	 */
 	public PushableEntity(Level level, float x, float y, float z, float width, float height, float depth, float resistance){
-		super(level, x, y, z, width, height, depth);
+		super(level, x, y, z, width, height, depth, PConstants.CENTER);
 		init(resistance);
 	}
 	

@@ -117,4 +117,74 @@ public class BoundingBox3D extends BoundingBox {
 	public float getMaxZ() {
 		return maxLocation.z;
 	}
+
+	@Override
+	public void setWidth(float width) {
+		this.width = width;
+	}
+
+	@Override
+	public void setHeight(float height) {
+		this.height = height;
+	}
+
+	@Override
+	public void setDepth(float depth) {
+		this.depth = depth;
+	}
+
+	@Override
+	public void setCenterX(float x) {
+		this.location.x = x;
+	}
+
+	@Override
+	public void setCenterY(float y) {
+		this.location.y = y;
+	}
+
+	@Override
+	public void setCenterZ(float z) {
+		this.location.z = z;
+	}
+
+	@Override
+	public void setSize(PVector size) {
+		setWidth(size.x);
+		setHeight(size.y);
+		setDepth(size.z);
+	}
+
+	@Override
+	public void setLocation(PVector location) {
+		setCenterX(location.x);
+		setCenterY(location.y);
+		setCenterZ(location.z);
+	}
+
+	@Override
+	public void setDimensions(PVector location, PVector size) {
+		setLocation(location);
+		setSize(size);
+	}
+
+	@Override
+	public void addX(float x) {
+		this.location.x += x;
+	}
+
+	@Override
+	public void addY(float y) {
+		this.location.y += y;
+	}
+
+	@Override
+	public void addZ(float z) {
+		this.location.z += z;
+	}
+
+	@Override
+	public void addLocation(PVector pVector) {
+		this.location.add(pVector);
+	}
 }

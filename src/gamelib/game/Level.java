@@ -1,5 +1,6 @@
 package gamelib.game;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +64,7 @@ public abstract class Level {
 			this.camera = camera;
 		}
 		this.gravity = new PVector();
-		this.airFriction = 0;
+		this.airFriction = 1;
 		this.gridWidth = 16;
 		updateGrid();
 	}
@@ -174,26 +175,37 @@ public abstract class Level {
 	}
 
 	/**
-	 * Detect if this entity is on the ground. If so, the ground object is returned.
+	 * Detect if the given entity is on the ground. If so, the ground object is returned.
 	 * Note: This method does collision detection.
-	 * @param entity The entity to test
+	 * 
+	 * @param entity - The entity to test
 	 * @return the ground object or null if not on the ground
 	 * TODO increase efficiency
 	 */
 	Entity getGround(Entity entity) {
-		if(entity.getCollisionGroup() == 0) return null;
-		for(Entity ent : entities){
+		if (entity.getCollisionGroup() == 0) {
+			return null;
+		}
+		for (Entity ent : entities) {
 			if(ent == entity) continue;
 			if(!needToCheckCollision(entity, ent)) continue;
 			BoundingBox thisbb = entity.getBoundingBox();
 			BoundingBox otherbb = ent.getBoundingBox();
 			float groundDist = 1;//TODO extract
-			if(otherbb.contains(new PVector(entity.getX() + thisbb.getCenterX(), entity.getY() + thisbb.getMaxY() + groundDist, entity.getZ() + thisbb.getCenterZ()))
-			|| otherbb.contains(new PVector(entity.getX() + thisbb.getMinX(),    entity.getY() + thisbb.getMaxY() + groundDist, entity.getZ() + thisbb.getMinZ()))
-			|| otherbb.contains(new PVector(entity.getX() + thisbb.getMinX(),    entity.getY() + thisbb.getMaxY() + groundDist, entity.getZ() + thisbb.getMaxZ()))
-			|| otherbb.contains(new PVector(entity.getX() + thisbb.getMaxX(),    entity.getY() + thisbb.getMaxY() + groundDist, entity.getZ() + thisbb.getMinZ()))
-			|| otherbb.contains(new PVector(entity.getX() + thisbb.getMaxX(),    entity.getY() + thisbb.getMaxY() + groundDist, entity.getZ() + thisbb.getMaxZ()))){
-				return ent;
+			if (is3D()) {
+				if (otherbb.contains(new PVector(thisbb.getCenterX(), thisbb.getMaxY() + groundDist, thisbb.getCenterZ()))
+				||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMaxY() + groundDist, thisbb.getMinZ()))
+				||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMaxY() + groundDist, thisbb.getMaxZ()))
+				||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMaxY() + groundDist, thisbb.getMinZ()))
+				||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMaxY() + groundDist, thisbb.getMaxZ()))) {
+					return ent;
+				}
+			} else {
+				if (otherbb.contains(new PVector(thisbb.getCenterX(), thisbb.getMaxY() + groundDist))
+				||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMaxY() + groundDist))
+				||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMaxY() + groundDist))) {
+					return ent;
+				}				
 			}
 		}
 		return null;
@@ -315,6 +327,29 @@ public abstract class Level {
 	 */
 	public final void setDrawGrid(boolean b){
 		this.drawGrid = b;
+	}
+
+	/**
+	 * Get the zoom level.
+	 * 
+	 * @return
+	 */
+	public float getZoom() {
+		return zoom;
+	}
+
+	/**
+	 * Set the zoom level (must be greater than zero).
+	 * >1 => Zoom In
+	 * <1 => Zoom Out
+	 * 
+	 * @param zoom - The zoom level
+	 */
+	public void setZoom(float zoom) {
+		if (zoom <= 0) {
+			throw new InvalidParameterException("The Zoom Level must be greater than zero.");
+		}
+		this.zoom = zoom;
 	}
 
 	/**

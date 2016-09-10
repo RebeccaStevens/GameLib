@@ -1,5 +1,6 @@
 package gamelib.game;
 
+import java.security.InvalidParameterException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,6 +9,7 @@ import gamelib.GameManager;
 import gamelib.Updatable;
 import gamelib.game.entities.PushableEntity;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
@@ -17,6 +19,11 @@ public abstract class Entity implements Updatable, Drawable {
 	private PVector velocity;
 	private PVector rotation;
 	private PVector scale;
+	
+	private PVector locationOffset;
+	private PVector velocityOffset;
+	private PVector rotationOffset;
+	private PVector scaleOffset;
 	
 	private float mass;
 	
@@ -40,6 +47,8 @@ public abstract class Entity implements Updatable, Drawable {
 	private Set<Entity> attachedEntities;
 	private Set<Entity> entitiesOnMe;
 	
+	private int drawMode;
+	
 	enum CollisionMode{
 		GREATER_THAN_OR_EQUAL_TO, EQUAL_TO, LESS_THAN;
 	}
@@ -52,8 +61,8 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param width The width
 	 * @param height The height
 	 */
-	public Entity(Level level, float x, float y, float width, float height){
-		this(level, x, y, 0, width, height, 0);
+	public Entity(Level level, float x, float y, float width, float height, int drawMode){
+		this(level, x, y, 0, width, height, 0, drawMode);
 	}
 	
 	/**
@@ -63,8 +72,8 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param width The width
 	 * @param height The height
 	 */
-	public Entity(Level level, PVector location, float width, float height){
-		this(level, location.x, location.y, 0, width, 1, height);
+	public Entity(Level level, PVector location, float width, float height, int drawMode){
+		this(level, location.x, location.y, 0, width, 1, height, drawMode);
 	}
 	
 	/**
@@ -75,8 +84,8 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param height The height
 	 * @param depth The depth
 	 */
-	public Entity(Level level, PVector location, float width, float height, float depth){
-		this(level, location.x, location.y, location.z, width, height, depth);
+	public Entity(Level level, PVector location, float width, float height, float depth, int drawMode){
+		this(level, location.x, location.y, location.z, width, height, depth, drawMode);
 	}
 	
 	/**
@@ -89,41 +98,62 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param height The height
 	 * @param depth The depth
 	 */
-	public Entity(Level level, float x, float y, float z, float width, float height, float depth){
+	public Entity(Level level, float x, float y, float z, float width, float height, float depth, int drawMode) {
 		setLevel(level);
-		location = new PVector(
+		this.location = new PVector(
 				level.convertGridUnitsXToPixels(x),
 				level.convertGridUnitsYToPixels(y),
 				level.convertGridUnitsZToPixels(z));
-		velocity = new PVector();
-		rotation = new PVector();
-		if(level.is3D()){
-			boundingBox = new BoundingBox3D(this,
+		this.velocity = new PVector();
+		this.rotation = new PVector();
+		
+		if (level.is3D()) {
+			this.boundingBox = new BoundingBox3D(this,
 					level.convertGridUnitsWidthToPixels(width),
 					level.convertGridUnitsHeightToPixels(height),
 					level.convertGridUnitsDepthToPixels(depth));
-		}
-		else{
-			boundingBox = new BoundingBox2D(this,
+		} else {
+			this.boundingBox = new BoundingBox2D(this,
 					level.convertGridUnitsWidthToPixels(width),
 					level.convertGridUnitsHeightToPixels(height));
 		}
-		scale = new PVector(1, 1, 1);
 		
-		attachedEntities = new HashSet<Entity>();
-		entitiesOnMe = new HashSet<Entity>();
-		collisionIgnore = new HashSet<Entity>();
+		this.scale = new PVector(1, 1, 1);
 		
-		mass = 1;
-		gravityEffected = false;
-		collisionGroup = 1;
-		collisionMode = CollisionMode.GREATER_THAN_OR_EQUAL_TO;
+		this.locationOffset = new PVector();
+		this.velocityOffset = new PVector();
+		this.rotationOffset = new PVector();
+		this.scaleOffset = new PVector();
 		
-		ground = null;
+		if (drawMode == PConstants.CENTER) {
+			this.drawMode = drawMode;
+		} else if (drawMode == PConstants.CORNER) {
+			this.drawMode = drawMode;
+			this.location.add(
+					level.convertGridUnitsWidthToPixels(width / 2),
+					level.convertGridUnitsHeightToPixels(height / 2),
+					level.convertGridUnitsDepthToPixels(depth / 2));
+		} else {
+			throw new InvalidParameterException("Only CENTER and CORNER draw modes are supported.");
+		}
 		
-		maxLocation = null;	minLocation = null;
-		maxVelocity = null;	minVelocity = null;
-		maxRotation = null;	minRotation = null;
+		this.attachedEntities = new HashSet<Entity>();
+		this.entitiesOnMe = new HashSet<Entity>();
+		this.collisionIgnore = new HashSet<Entity>();
+		
+		this.mass = 1;
+		this.gravityEffected = false;
+		this.collisionGroup = 1;
+		this.collisionMode = CollisionMode.GREATER_THAN_OR_EQUAL_TO;
+		
+		this.ground = null;
+		
+		this.maxLocation = null;
+		this.minLocation = null;
+		this.maxVelocity = null;
+		this.minVelocity = null;
+		this.maxRotation = null;
+		this.minRotation = null;
 	}
 
 	/**
@@ -166,20 +196,21 @@ public abstract class Entity implements Updatable, Drawable {
 		update(delta);
 		if(this.level == null) return;
 		applyMotionLimits();
+		this.boundingBox.setLocation(PVector.add(this.location, this.locationOffset));
 		
 		boolean allChildrenCanMove = true;
 		for(Entity ent : attachedEntities){
 			if(!ent.updateAttached(delta)) allChildrenCanMove = false;
 		}
 
-		PVector currentLocation = getLocation();
+		PVector currentLocation = PVector.add(this.location, this.locationOffset);
 		PVector newLocation = getMoveToLocation(delta);
 		
 		if(allChildrenCanMove){
 			if(!move(newLocation, currentLocation)){
-				if(!move(new PVector(newLocation.x, currentLocation.y, currentLocation.z), currentLocation)){ velocity.x = 0; }
-				if(!move(new PVector(currentLocation.x, currentLocation.y, newLocation.z), currentLocation)){ velocity.z = 0; }
-				if(!move(new PVector(currentLocation.x, newLocation.y, currentLocation.z), currentLocation)){ velocity.y = 0; }
+				if(!move(new PVector(newLocation.x, currentLocation.y, currentLocation.z), currentLocation)){ velocity.x = 0; velocityOffset.x = 0; }
+				if(!move(new PVector(currentLocation.x, currentLocation.y, newLocation.z), currentLocation)){ velocity.z = 0; velocityOffset.y = 0; }
+				if(!move(new PVector(currentLocation.x, newLocation.y, currentLocation.z), currentLocation)){ velocity.y = 0; velocityOffset.z = 0; }
 			}
 		}
 		
@@ -202,6 +233,7 @@ public abstract class Entity implements Updatable, Drawable {
 		}
 		
 		velocity.mult(0);
+		velocityOffset.mult(0);
 		
 		PVector newLocation = getMoveToLocation(delta);
 		return level.canMove(this, newLocation) == null;
@@ -262,10 +294,11 @@ public abstract class Entity implements Updatable, Drawable {
 		this.moveNow(newLocation, dLocation);
 		
 		this.velocity.mult(1-resistance);
+		this.velocityOffset.mult(1-resistance);
 		((Entity)(pushee)).velocity.add(
-				this.level.convertGridUnitsVelocityXToPixels(this.velocity.x),
-				this.level.convertGridUnitsVelocityYToPixels(this.velocity.y),
-				this.level.convertGridUnitsVelocityZToPixels(this.velocity.z));
+				this.level.convertGridUnitsVelocityXToPixels(this.velocity.x + this.velocityOffset.x),
+				this.level.convertGridUnitsVelocityYToPixels(this.velocity.y + this.velocityOffset.y),
+				this.level.convertGridUnitsVelocityZToPixels(this.velocity.z + this.velocityOffset.z));
 		
 		return true;
 	}
@@ -286,9 +319,9 @@ public abstract class Entity implements Updatable, Drawable {
 		}
 		
 		return PVector.add(location, new PVector(
-				this.level.convertGridUnitsVelocityXToPixels(this.velocity.x) * delta,
-				this.level.convertGridUnitsVelocityYToPixels(this.velocity.y) * delta,
-				this.level.convertGridUnitsVelocityZToPixels(this.velocity.z) * delta));
+				this.level.convertGridUnitsVelocityXToPixels(this.velocity.x + this.velocityOffset.x) * delta,
+				this.level.convertGridUnitsVelocityYToPixels(this.velocity.y + this.velocityOffset.y) * delta,
+				this.level.convertGridUnitsVelocityZToPixels(this.velocity.z + this.velocityOffset.z) * delta));
 	}
 	
 	/**
@@ -299,27 +332,26 @@ public abstract class Entity implements Updatable, Drawable {
 	final void _draw(PGraphics g){
 		if(this.level == null) return;
 		g.pushMatrix();
-		if(level.is3D()){
-			g.translate(location.x, location.y, location.z);
-			g.rotateX(rotation.x);
-			g.rotateY(rotation.y);
-			g.rotateZ(rotation.z);
-			g.scale(scale.x, scale.y, scale.z);
-		}
-		else{
-			g.translate(location.x, location.y);
-			g.rotate(rotation.x);
-			g.scale(scale.x, scale.y);
+		if (this.level.is3D()) {
+			g.translate(this.location.x + this.locationOffset.x, this.location.y + this.locationOffset.y, this.location.z + this.locationOffset.z);
+			g.rotateX(this.rotation.x + this.rotationOffset.x);
+			g.rotateY(this.rotation.y + this.rotationOffset.y);
+			g.rotateZ(this.rotation.z + this.rotationOffset.z);
+			g.scale(this.scale.x + this.scaleOffset.x, this.scale.y + this.scaleOffset.y, this.scale.z + this.scaleOffset.z);
+		} else {
+			g.translate(this.boundingBox.getCenterX() + this.locationOffset.x, this.boundingBox.getCenterY() + this.locationOffset.y);
+			g.rotate(this.rotation.x + this.rotationOffset.x);
+			g.scale(this.scale.x + this.scaleOffset.x, this.scale.y + this.scaleOffset.y);
 		}
 		g.pushStyle();
+		g.rectMode(PConstants.CENTER);
 		draw(g);
 		g.popStyle();
-		g.pushStyle();
-		if(level.isDrawBoundingBoxes()){
+		g.popMatrix();
+		
+		if (this.level.isDrawBoundingBoxes()) {
 			drawBoundingBox(g);
 		}
-		g.popStyle();
-		g.popMatrix();
 	}
 
 	/**
@@ -327,10 +359,9 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param g The graphics object to draw to
 	 */
 	private void drawBoundingBox(PGraphics g) {
-		if(level.is3D()){
+		if (this.level.is3D()) {
 			drawBoundingBox3D(g);
-		}
-		else{
+		} else {
 			drawBoundingBox2D(g);
 		}
 	}
@@ -340,16 +371,23 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param g The graphics object to draw to
 	 */
 	private void drawBoundingBox2D(PGraphics g) {
-		float bbx = boundingBox.getCenterX();
-		float bby = boundingBox.getCenterY();
-		float bbw = boundingBox.getWidth();
-		float bbh = boundingBox.getHeight();
+		float bbx = this.boundingBox.getCenterX();
+		float bby = this.boundingBox.getCenterY();
+		float bbw = this.boundingBox.getWidth();
+		float bbh = this.boundingBox.getHeight();
+		
+		g.pushStyle();
+		g.rectMode(PApplet.CENTER);
+		g.noFill();
+		
+		g.stroke(0xFFFFFFFF);
+		g.strokeWeight(bbw > 10 && bbh > 10 ? 4F : 2F);
+		g.rect(bbx, bby, bbw, bbh);
 		
 		g.stroke(0xFFFF0000);
-		g.strokeWeight(bbw > 10 && bbh > 10 ? 3F : 1F);
-		g.noFill();
-		g.rectMode(PApplet.CORNER);
+		g.strokeWeight(bbw > 10 && bbh > 10 ? 2F : 1F);
 		g.rect(bbx, bby, bbw, bbh);
+		g.popStyle();
 	}
 	
 	/**
@@ -532,6 +570,7 @@ public abstract class Entity implements Updatable, Drawable {
 	private void takeOff(Entity entity){
 		this.entitiesOnMe.remove(entity);
 		entity.velocity.add(this.velocity);
+		entity.velocity.add(this.velocityOffset);
 	}
 	
 	/**
@@ -575,6 +614,14 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
+	 * Get the location offset of this entity.
+	 * @return the location offset
+	 */
+	public PVector getLocationOffset(){
+		return locationOffset.copy();
+	}
+
+	/**
 	 * Get the width of this entity.
 	 * @return the width
 	 */
@@ -596,6 +643,14 @@ public abstract class Entity implements Updatable, Drawable {
 	 */
 	public float getDepth(){
 		return boundingBox.getDepth();
+	}
+
+	/**
+	 * Get the location of this entity.
+	 * @return the location
+	 */
+	public PVector getSize(){
+		return new PVector(getWidth(), getHeight(), getDepth());
 	}
 
 	/**
@@ -628,6 +683,14 @@ public abstract class Entity implements Updatable, Drawable {
 	 */
 	public PVector getVelocity(){
 		return velocity.copy();
+	}
+
+	/**
+	 * Get the velocity offset of this entity.
+	 * @return the velocity offset
+	 */
+	public PVector getVelocityOffset(){
+		return velocityOffset.copy();
 	}
 
 	/**
@@ -669,6 +732,22 @@ public abstract class Entity implements Updatable, Drawable {
 	public PVector getRotation3D(){
 		return rotation.copy();
 	}
+	
+	/**
+	 * Get the rotation of this entity.
+	 * @return the rotation
+	 */
+	public float getRotationOffset2D(){
+		return rotationOffset.x;
+	}
+	
+	/**
+	 * Get the rotation of this entity (tilt, pan, roll).
+	 * @return the rotation
+	 */
+	public PVector getRotationOffset3D(){
+		return rotationOffset.copy();
+	}
 
 	/**
 	 * Get the x scale of this entity.
@@ -700,6 +779,14 @@ public abstract class Entity implements Updatable, Drawable {
 	 */
 	public PVector getScale(){
 		return scale.copy();
+	}
+	
+	/**
+	 * Get the scale of this entity.
+	 * @return The scale
+	 */
+	public PVector getScaleOffset(){
+		return scaleOffset.copy();
 	}
 	
 	/**
@@ -828,6 +915,60 @@ public abstract class Entity implements Updatable, Drawable {
 	public void setLocation(PVector loc){
 		location.set(loc);
 	}
+
+	/**
+	 * Set the x location offset of the entity.
+	 * @param x
+	 */
+	public void setLocationOffsetX(float x){
+		locationOffset.x = x;
+	}
+	
+	/**
+	 * Set the y location offset of the entity.
+	 * @param y
+	 */
+	public void setLocationOffsetY(float y){
+		locationOffset.y = y;
+	}
+	
+	/**
+	 * Set the z location offset of the entity.
+	 * (For 3D games only)
+	 * @param z
+	 */
+	public void setLocationOffsetZ(float z){
+		locationOffset.z = z;
+	}
+	
+	/**
+	 * Set the location offset of the entity.
+	 * (For 2D games only)
+	 * @param x
+	 * @param y
+	 */
+	public void setLocationOffset(float x, float y){
+		locationOffset.set(x, y, 0);
+	}
+	
+	/**
+	 * Set the location offset of the entity.
+	 * (For 3D games only)
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	public void setLocationOffset(float x, float y, float z){
+		locationOffset.set(x, y, z);
+	}
+
+	/**
+	 * Set the location offset of the entity.
+	 * @param loc
+	 */
+	public void setLocationOffset(PVector loc){
+		locationOffset.set(loc);
+	}
 	
 	/**
 	 * Set the x speed of the entity.
@@ -881,6 +1022,60 @@ public abstract class Entity implements Updatable, Drawable {
 	 */
 	public void setVelocity(PVector v){
 		velocity.set(v);
+	}
+	
+	/**
+	 * Set the x velocity offset of the entity.
+	 * @param vx
+	 */
+	public void setVelocityOffsetX(float vx){
+		velocityOffset.x = vx;
+	}
+	
+	/**
+	 * Set the y velocity offset of the entity.
+	 * @param vy
+	 */
+	public void setVelocityOffsetY(float vy){
+		velocityOffset.y = vy;
+	}
+	
+	/**
+	 * Set the z velocity offset of the entity.
+	 * (For 3D games only)
+	 * @param vz
+	 */
+	public void setVelocityOffsetZ(float vz){
+		velocityOffset.z = vz;
+	}
+	
+	/**
+	 * Set the velocity offset of the entity.
+	 * (For 2D games only)
+	 * @param vx
+	 * @param vy
+	 */
+	public void setVelocityOffset(float vx, float vy){
+		velocityOffset.set(vx, vy, 0);
+	}
+	
+	/**
+	 * Set the velocity offset of the entity.
+	 * (For 3D games only)
+	 * @param vx
+	 * @param vy
+	 * @param vz
+	 */
+	public void setVelocityOffset(float vx, float vy, float vz){
+		velocityOffset.set(vx, vy, vz);
+	}
+	
+	/**
+	 * Set the velocity offset of the entity.
+	 * @param v
+	 */
+	public void setVelocityOffset(PVector v){
+		velocityOffset.set(v);
 	}
 	
 	/**
@@ -943,6 +1138,65 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 	
 	/**
+	 * Set the tilt rotation offset of the entity.
+	 * This is the rotation in the xy plain.
+	 * (For 3D games only)
+	 * @param tilt
+	 */
+	public void setRotationOffsetTilt(float tilt){
+		rotationOffset.x = tilt;
+	}
+
+	/**
+	 * Set the pan rotation offset of the entity.
+	 * This is the rotation in the xz plain.
+	 * (For 3D games only)
+	 * @param pan
+	 */
+	public void setRotationOffsetPan(float pan){
+		rotationOffset.y = pan;
+	}
+	
+	/**
+	 * Set the roll rotation offset of the entity.
+	 * This is the rotation in the yz plain.
+	 * (For 3D games only)
+	 * @param roll
+	 */
+	public void setRotationOffsetRoll(float roll){
+		rotationOffset.z = roll;
+	}
+	
+	/**
+	 * Set the rotation offset of the entity.
+	 * (For 2D games only)
+	 * @param rotation
+	 */
+	public void setRotationOffset(float rotation){
+		this.rotationOffset.x = rotation;
+	}
+	
+	/**
+	 * Set the rotation offset of the entity.
+	 * (For 3D games only)
+	 * @param tilt
+	 * @param pan
+	 * @param roll
+	 */
+	public void setRotationOffset(float tilt, float pan, float roll){
+		rotationOffset.set(tilt, pan, roll);
+	}
+	
+	/**
+	 * Set the rotation offset of the entity.
+	 * (For 3D games only)
+	 * @param rotation
+	 */
+	public void setRotationOffset(PVector rotation){
+		this.rotationOffset.set(rotation);
+	}
+	
+	/**
 	 * Set the scale of the entity uniformly to the given value
 	 * @param s The new scale of the entity
 	 */
@@ -967,6 +1221,33 @@ public abstract class Entity implements Updatable, Drawable {
 	 */
 	public void setScale(float x, float y, float z){
 		scale.set(x, y, z);
+	}
+	
+	/**
+	 * Set the scale offset of the entity uniformly to the given value
+	 * @param s The new scale offset of the entity
+	 */
+	public void setScaleOffset(float s){
+		scaleOffset.set(s, s, s);
+	}
+	
+	/**
+	 * Set the scale offset of the entity.
+	 * @param x The x scale offset of the entity
+	 * @param y The y scale offset of the entity
+	 */
+	public void setScaleOffset(float x, float y){
+		scaleOffset.set(x, y, scaleOffset.z);
+	}
+	
+	/**
+	 * Set the scale offset of the entity.
+	 * @param x The x scale offset of the entity
+	 * @param y The y scale offset of the entity
+	 * @param z The z scale offset of the entity
+	 */
+	public void setScaleOffset(float x, float y, float z){
+		scaleOffset.set(x, y, z);
 	}
 	
 	/**
@@ -1361,24 +1642,24 @@ public abstract class Entity implements Updatable, Drawable {
 	 */
 	private void applyLocationLimits(){
 		if(minLocation != null){
-			location.x = Math.max(location.x, minLocation.x);
-			location.y = Math.max(location.y, minLocation.y);
-			location.z = Math.max(location.z, minLocation.z);
+			location.x = Math.max(location.x - locationOffset.x, minLocation.x);
+			location.y = Math.max(location.y - locationOffset.y, minLocation.y);
+			location.z = Math.max(location.z - locationOffset.z, minLocation.z);
 		}
 		if(maxLocation != null){
-			location.x = Math.min(location.x, maxLocation.x);
-			location.y = Math.min(location.y, maxLocation.y);
-			location.z = Math.min(location.z, maxLocation.z);
+			location.x = Math.min(location.x - locationOffset.x, maxLocation.x);
+			location.y = Math.min(location.y - locationOffset.y, maxLocation.y);
+			location.z = Math.min(location.z - locationOffset.z, maxLocation.z);
 		}
 		if(minRotation != null){
-			rotation.x = Math.max(rotation.x, minRotation.x);
-			rotation.y = Math.max(rotation.y, minRotation.y);
-			rotation.z = Math.max(rotation.z, minRotation.z);
+			rotation.x = Math.max(rotation.x - rotationOffset.x, minRotation.x);
+			rotation.y = Math.max(rotation.y - rotationOffset.y, minRotation.y);
+			rotation.z = Math.max(rotation.z - rotationOffset.z, minRotation.z);
 		}
 		if(maxRotation != null){
-			rotation.x = Math.min(rotation.x, maxRotation.x);
-			rotation.y = Math.min(rotation.y, maxRotation.y);
-			rotation.z = Math.min(rotation.z, maxRotation.z);
+			rotation.x = Math.min(rotation.x - rotationOffset.x, maxRotation.x);
+			rotation.y = Math.min(rotation.y - rotationOffset.y, maxRotation.y);
+			rotation.z = Math.min(rotation.z - rotationOffset.z, maxRotation.z);
 		}
 	}
 	
@@ -1387,18 +1668,20 @@ public abstract class Entity implements Updatable, Drawable {
 	 */
 	private void applyMotionLimits() {
 		if(minVelocity != null){
-			velocity.x = Math.max(velocity.x, minVelocity.x);
-			velocity.y = Math.max(velocity.y, minVelocity.y);
-			velocity.z = Math.max(velocity.z, minVelocity.z);
+			velocity.x = Math.max(velocity.x - velocityOffset.x, minVelocity.x);
+			velocity.y = Math.max(velocity.y - velocityOffset.y, minVelocity.y);
+			velocity.z = Math.max(velocity.z - velocityOffset.z, minVelocity.z);
 		}
 		if(maxVelocity != null){
-			velocity.x = Math.min(velocity.x, maxVelocity.x);
-			velocity.y = Math.min(velocity.y, maxVelocity.y);
-			velocity.z = Math.min(velocity.z, maxVelocity.z);
+			velocity.x = Math.min(velocity.x - velocityOffset.x, maxVelocity.x);
+			velocity.y = Math.min(velocity.y - velocityOffset.y, maxVelocity.y);
+			velocity.z = Math.min(velocity.z - velocityOffset.z, maxVelocity.z);
 		}
 		if(!Float.isNaN(maxHorizontalVelocity)){
 			PVector temp = velocity.copy();
-			temp.y = 0;
+			temp.x += this.velocityOffset.x;
+			temp.y =  0;
+			temp.z += this.velocityOffset.z;
 			if(temp.mag() > maxHorizontalVelocity){
 				temp.normalize();
 				temp.mult(maxHorizontalVelocity);
