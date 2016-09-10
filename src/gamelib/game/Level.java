@@ -116,8 +116,8 @@ public abstract class Level {
 		g.stroke(0x33000000); // black transparent lines	
 		g.strokeWeight(1);
 		
-		float xOffset = (this.camera.getX() * this.gridWidth / g.width) % 1;
-		float yOffset = (this.camera.getY() * this.gridHeight / g.height) % 1;
+		float xOffset = (this.camera.getX() * this.gridWidth / this.zoom / g.width) % 1;
+		float yOffset = (this.camera.getY() * this.gridHeight / this.zoom / g.height) % 1;
 		
 		// draw the vertical lines
 		for (int i = 0; i < gridWidth / this.zoom + 1; i++) {
