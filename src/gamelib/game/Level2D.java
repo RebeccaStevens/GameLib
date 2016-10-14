@@ -21,7 +21,7 @@ public abstract class Level2D extends Level {
 	}
 	
 	@Override
-	public void update(float delta){
+	public final void update(float delta){
 		if(entitiesNeedResorting){
 			Collections.sort(entities, new Comparator<Entity>(){
 				@Override
