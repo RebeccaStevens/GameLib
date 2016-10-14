@@ -4,13 +4,15 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
+import gamelib.Drawable;
 import gamelib.GameManager;
+import gamelib.Updatable;
 import gamelib.game.cameras.CameraStatic;
 import gamelib.scenes.GameScene;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
-public abstract class Level {
+public abstract class Level implements Updatable, Drawable {
 
 	protected List<Entity> entities;
 	private List<Entity> entitiesToRemove;
