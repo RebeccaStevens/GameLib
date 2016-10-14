@@ -73,8 +73,11 @@ public abstract class Level implements Updatable, Drawable {
 	
 	/**
 	 * Update the level
+	 * 
+	 * @param delta The amount of game time that has passed since the last frame
 	 */
-	public void update(float delta){
+	public void update(float delta) {
+		preUpdate(delta);
 		camera.update(delta);
 		for(Entity e : entities){
 			e._update(delta);
@@ -84,7 +87,22 @@ public abstract class Level implements Updatable, Drawable {
 		}
 		entities.removeAll(entitiesToRemove);
 		entitiesToRemove.clear();
+		postUpdate(delta);
 	}
+	
+	/**
+	 * Called each frame before the level updates.
+	 * 
+	 * @param delta The amount of game time that has passed since the last frame
+	 */
+	public abstract void preUpdate(float delta);
+	
+	/**
+	 * Called each frame after the level updates.
+	 * 
+	 * @param delta The amount of game time that has passed since the last frame
+	 */
+	public abstract void postUpdate(float delta);
 
 	/**
 	 * Draw the level.
