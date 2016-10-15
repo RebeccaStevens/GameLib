@@ -14,11 +14,11 @@ import processing.core.PVector;
 
 public abstract class Level implements Updatable, Drawable {
 
-	protected List<GameObject> gameObjects;
-	protected List<Entity> entities;
-	private List<GameObject> gameObjectsToRemove;
-	protected List<DynamicLight> dLights;	// dynamic Lights
-	protected List<Light> lights;			// all Lights
+	protected final List<GameObject> gameObjects;
+	protected final List<Entity> entities;
+	private final List<GameObject> gameObjectsToRemove;
+	protected final List<DynamicLight> dLights;	// dynamic Lights
+	protected final List<Light> lights;			// all Lights
 	
 	private Camera camera;
 	

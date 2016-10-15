@@ -8,7 +8,7 @@ import java.util.Map;
 public abstract class Level2D extends Level {
 
 	private boolean entitiesNeedResorting;
-	private Map<Entity, Float> entityLayer;
+	private final Map<Entity, Float> entityLayer;
 	
 	public Level2D(){
 		entityLayer = new HashMap<Entity, Float>();
