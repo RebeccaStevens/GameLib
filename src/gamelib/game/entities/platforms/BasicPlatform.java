@@ -1,30 +1,38 @@
 package gamelib.game.entities.platforms;
 
-import gamelib.Style;
 import gamelib.game.Level;
 import gamelib.game.entities.Platform;
+import processing.core.PConstants;
 import processing.core.PGraphics;
+import processing.core.PStyle;
 
 public class BasicPlatform extends Platform {
 
-	private Style style;
+	private PStyle style;
 
 	public BasicPlatform(Level level, float x, float y, float width, float height) {
-		this(level, x, y, width, height, new Style());
+		this(level, x, y, width, height, createDefaultStyle());
 	}
 	
-	public BasicPlatform(Level level, float x, float y, float width, float height, Style style) {
+	public BasicPlatform(Level level, float x, float y, float width, float height, PStyle style) {
 		super(level, x, y, width, height);
 		this.style = style;
 	}
 	
 	public BasicPlatform(Level level, float x, float y, float z, float width, float height, float depth) {
-		this(level, x, y, z, width, height, depth, new Style());
+		this(level, x, y, z, width, height, depth, createDefaultStyle());
 	}
 	
-	public BasicPlatform(Level level, float x, float y, float z, float width, float height, float depth, Style style) {
+	public BasicPlatform(Level level, float x, float y, float z, float width, float height, float depth, PStyle style) {
 		super(level, x, y, z, width, height, depth);
 		this.style = style;
+	}
+
+	private static PStyle createDefaultStyle() {
+		PStyle style = new PStyle();
+		style.fillColor = 0xFFFFFFFF;
+		style.fill = true;
+		return style;
 	}
 
 	@Override
@@ -43,12 +51,14 @@ public class BasicPlatform extends Platform {
 	}
 	
 	private void draw2D(PGraphics g) {
-		style.apply(g);
+		g.style(style);
+		g.rectMode = PConstants.CENTER;
 		g.rect(0, 0, getWidthInPixels(), getHeightInPixels());
 	}
 	
 	private void draw3D(PGraphics g) {
-		style.apply(g);
+		g.style(style);
+		g.rectMode = PConstants.CENTER;
 		g.box(getWidthInPixels(), getHeightInPixels(), getDepthInPixels());
 	}
 }
