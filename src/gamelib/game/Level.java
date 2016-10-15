@@ -174,6 +174,7 @@ public abstract class Level implements Updatable, Drawable {
 	 * @param entity
 	 */
 	void addGameObject(GameObject object){
+		// TODO prevent cameras from being added
 		gameObjects.add(object);
 		if (object instanceof Entity) {
 			entities.add((Entity) object);
