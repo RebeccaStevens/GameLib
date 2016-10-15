@@ -15,8 +15,6 @@ public final class GameManager {
 	private Scene activeScene;
 	private GameScene gameScene;
 
-	private Background background;
-
 	private boolean autoDraw = true;
 	
 	private boolean drawFPS = false;
@@ -29,7 +27,6 @@ public final class GameManager {
 		this.sketch = sketch;
 		GameManager.me = this;
 		this.time = new Time();
-		this.background = new Background(0xFF2277FF);
 		this.gameScene = new GameScene();
 		setActiveScene(this.gameScene);
 		
@@ -60,7 +57,6 @@ public final class GameManager {
 		g.ellipseMode(PApplet.CENTER);
 		g.imageMode(PApplet.CENTER);
 		if (this.activeScene != null) {
-			this.background.draw(g);
 			this.activeScene.draw(g);
 		}
 		if (drawFPS) {
