@@ -136,8 +136,7 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * @param delta The amount of game time that has passed since the last frame
 	 */
 	final void _update(float delta) {
-		Level level = getLevel();
-		if (level == null) {
+		if (getLevel() == null) {
 			return;
 		}
 		if (attachedTo != null) {
@@ -146,7 +145,7 @@ public abstract class Entity extends GameObject implements Drawable {
 		
 		update(delta);
 		
-		if (level == null) {
+		if (getLevel() == null) {
 			return;
 		}
 		
@@ -427,6 +426,19 @@ public abstract class Entity extends GameObject implements Drawable {
 		return applyAcceleration(PVector.div(f, mass), friction, time);
 	}
 	
+	/**
+	 * Apply the limits the rotation of this entity.
+	 */
+	protected void applyRotationLimits() {
+		if (!Float.isNaN(minRotation.x)) rotation.x = Math.max(rotation.x - rotationOffset.x, minRotation.x);
+		if (!Float.isNaN(minRotation.y)) rotation.y = Math.max(rotation.y - rotationOffset.y, minRotation.y);
+		if (!Float.isNaN(minRotation.z)) rotation.z = Math.max(rotation.z - rotationOffset.z, minRotation.z);
+		
+		if (!Float.isNaN(maxRotation.x)) rotation.x = Math.min(rotation.x - rotationOffset.x, maxRotation.x);
+		if (!Float.isNaN(maxRotation.y)) rotation.y = Math.min(rotation.y - rotationOffset.y, maxRotation.y);
+		if (!Float.isNaN(maxRotation.z)) rotation.z = Math.min(rotation.z - rotationOffset.z, maxRotation.z);
+	}
+
 	/**
 	 * Attach an entity to me.
 	 * 
@@ -1165,18 +1177,5 @@ public abstract class Entity extends GameObject implements Drawable {
 	public void removeLimitRotation3DRoll() {
 		removeLimitRotation3DRollMin();
 		removeLimitRotation3DRollMax();
-	}
-	
-	/**
-	 * Apply the limits the rotation of this entity.
-	 */
-	protected void applyRotationLimits() {
-		if (!Float.isNaN(minRotation.x)) rotation.x = Math.max(rotation.x - rotationOffset.x, minRotation.x);
-		if (!Float.isNaN(minRotation.y)) rotation.y = Math.max(rotation.y - rotationOffset.y, minRotation.y);
-		if (!Float.isNaN(minRotation.z)) rotation.z = Math.max(rotation.z - rotationOffset.z, minRotation.z);
-		
-		if (!Float.isNaN(maxRotation.x)) rotation.x = Math.min(rotation.x - rotationOffset.x, maxRotation.x);
-		if (!Float.isNaN(maxRotation.y)) rotation.y = Math.min(rotation.y - rotationOffset.y, maxRotation.y);
-		if (!Float.isNaN(maxRotation.z)) rotation.z = Math.min(rotation.z - rotationOffset.z, maxRotation.z);
 	}
 }

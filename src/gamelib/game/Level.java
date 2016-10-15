@@ -80,7 +80,7 @@ public abstract class Level implements Updatable, Drawable {
 	 */
 	public void update(float delta) {
 		preUpdate(delta);
-		camera.update(delta);
+		camera._update(delta);
 		for(GameObject e : gameObjects){
 			e._update(delta);
 		}
@@ -139,8 +139,8 @@ public abstract class Level implements Updatable, Drawable {
 		g.stroke(0x33000000); // black transparent lines	
 		g.strokeWeight(1);
 		
-		float xOffset = (this.camera.getX() * this.gridWidth / this.zoom / g.width) % 1;
-		float yOffset = (this.camera.getY() * this.gridHeight / this.zoom / g.height) % 1;
+		float xOffset = (this.camera.getXInPixels() * this.gridWidth / this.zoom / g.width) % 1;
+		float yOffset = (this.camera.getYInPixels() * this.gridHeight / this.zoom / g.height) % 1;
 		
 		// draw the vertical lines
 		for (int i = 0; i < gridWidth / this.zoom + 1; i++) {

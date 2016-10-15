@@ -147,6 +147,43 @@ abstract class GameObject implements Updatable {
 	}
 	
 	/**
+	 * Apply the limits the location of this entity.
+	 */
+	protected void applyLocationLimits() {
+		if (!Float.isNaN(minLocation.x)) location.x = Math.max(getX(), minLocation.x);
+		if (!Float.isNaN(minLocation.y)) location.y = Math.max(getY(), minLocation.y);
+		if (!Float.isNaN(minLocation.z)) location.z = Math.max(getZ(), minLocation.z);
+	
+		if (!Float.isNaN(maxLocation.x)) location.x = Math.min(getX(), maxLocation.x);
+		if (!Float.isNaN(maxLocation.y)) location.y = Math.min(getY(), maxLocation.y);
+		if (!Float.isNaN(maxLocation.z)) location.z = Math.min(getZ(), maxLocation.z);
+	}
+
+	/**
+	 * Apply the limits the motion of this entity.
+	 */
+	protected void applyMotionLimits() {
+		if (!Float.isNaN(minVelocity.x)) velocity.x = Math.max(getVelocityX(), minVelocity.x);
+		if (!Float.isNaN(minVelocity.y)) velocity.y = Math.max(getVelocityY(), minVelocity.y);
+		if (!Float.isNaN(minVelocity.z)) velocity.z = Math.max(getVelocityZ(), minVelocity.z);
+	
+		if (!Float.isNaN(maxVelocity.x)) velocity.x = Math.min(getVelocityX(), maxVelocity.x);
+		if (!Float.isNaN(maxVelocity.y)) velocity.y = Math.min(getVelocityZ(), maxVelocity.y);
+		if (!Float.isNaN(maxVelocity.z)) velocity.z = Math.min(getVelocityY(), maxVelocity.z);
+	
+		if(!Float.isNaN(maxHorizontalVelocity)){
+			PVector temp = getVelocity();
+			temp.y =  0;
+			if(temp.mag() > maxHorizontalVelocity){
+				temp.normalize();
+				temp.mult(maxHorizontalVelocity);
+				velocity.x = temp.x;
+				velocity.z = temp.z;
+			}
+		}
+	}
+
+	/**
 	 * Get the location the entity wants to move to.
 	 * 
 	 * @param delta The amount of game time that has passed since the last frame
@@ -353,7 +390,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param level
 	 */
-	private void setLevel(Level level) {
+	void setLevel(Level level) {
 		if (level == null) {
 			remove();
 		} else {
@@ -367,7 +404,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param x
 	 */
-	public void addLocationX(float x){
+	public void addX(float x){
 		location.x += x;
 	}
 	
@@ -376,7 +413,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param y
 	 */
-	public void addLocationY(float y){
+	public void addY(float y){
 		location.y += y;
 	}
 	
@@ -386,7 +423,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param z
 	 */
-	public void addLocationZ(float z){
+	public void addZ(float z){
 		location.z += z;
 	}
 	
@@ -427,7 +464,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param x
 	 */
-	public void addLocationOffsetX(float x){
+	public void addXOffset(float x){
 		locationOffset.x += x;
 	}
 	
@@ -436,7 +473,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param y
 	 */
-	public void addLocationOffsetY(float y){
+	public void addYOffset(float y){
 		locationOffset.y += y;
 	}
 	
@@ -446,7 +483,7 @@ abstract class GameObject implements Updatable {
 	 * (For 3D games only)
 	 * @param z
 	 */
-	public void addLocationOffsetZ(float z){
+	public void addZOffset(float z){
 		locationOffset.z += z;
 	}
 	
@@ -607,7 +644,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param x
 	 */
-	public void setLocationX(float x){
+	public void setX(float x){
 		location.x = x;
 	}
 	
@@ -616,7 +653,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param y
 	 */
-	public void setLocationY(float y){
+	public void setY(float y){
 		location.y = y;
 	}
 	
@@ -626,7 +663,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param z
 	 */
-	public void setLocationZ(float z){
+	public void setZ(float z){
 		location.z = z;
 	}
 	
@@ -667,7 +704,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param x
 	 */
-	public void setLocationOffsetX(float x){
+	public void setXOffset(float x){
 		locationOffset.x = x;
 	}
 	
@@ -676,7 +713,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param y
 	 */
-	public void setLocationOffsetY(float y){
+	public void setYOffset(float y){
 		locationOffset.y = y;
 	}
 	
@@ -686,7 +723,7 @@ abstract class GameObject implements Updatable {
 	 * (For 3D games only)
 	 * @param z
 	 */
-	public void setLocationOffsetZ(float z){
+	public void setZOffset(float z){
 		locationOffset.z = z;
 	}
 	
@@ -862,7 +899,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param minX The minimum x location this entity can be
 	 */
-	public void limitLocationXMin(float minX) {
+	public void limitXMin(float minX) {
 		minLocation.x = minX;
 	}
 	
@@ -871,7 +908,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param minX The minimum y location this entity can be
 	 */
-	public void limitLocationYMin(float minY) {
+	public void limitYMin(float minY) {
 		minLocation.y = minY;
 	}
 	
@@ -880,7 +917,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param minX The minimum z location this entity can be
 	 */
-	public void limitLocationZMin(float minZ) {
+	public void limitZMin(float minZ) {
 		minLocation.z = minZ;
 	}
 
@@ -889,7 +926,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param maxX The maximum x location this entity can be
 	 */
-	public void limitLocationXMax(float maxX) {
+	public void limitXMax(float maxX) {
 		maxLocation.x = maxX;
 	}
 	
@@ -898,7 +935,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param maxY The maximum y location this entity can be
 	 */
-	public void limitLocationYMax(float maxY) {
+	public void limitYMax(float maxY) {
 		maxLocation.y = maxY;
 	}
 	
@@ -907,7 +944,7 @@ abstract class GameObject implements Updatable {
 	 * 
 	 * @param maxZ The maximum z location this entity can be
 	 */
-	public void limitLocationZMax(float maxZ) {
+	public void limitZMax(float maxZ) {
 		maxLocation.z = maxZ;
 	}
 	
@@ -978,71 +1015,71 @@ abstract class GameObject implements Updatable {
 	}
 	
 	/**
+	 * Remove the limits applied to the x location of this entity.
+	 */
+	public void removeLimitX(){
+		removeLimitXMin();
+		removeLimitXMax();
+	}
+
+	/**
+	 * Remove the limits applied to the y location of this entity.
+	 */
+	public void removeLimitY(){
+		removeLimitYMin();
+		removeLimitYMax();
+	}
+
+	/**
+	 * Remove the limits applied to the z location of this entity.
+	 */
+	public void removeLimitZ(){
+		removeLimitZMin();
+		removeLimitZMax();
+	}
+
+	/**
 	 * Remove the limits applied to the min x location of this entity.
 	 */
-	public void removeLimitLocationXMin(){
+	public void removeLimitXMin(){
 		minLocation.x = Float.NaN;
 	}
 	
 	/**
 	 * Remove the limits applied to the min y location of this entity.
 	 */
-	public void removeLimitLocationYMin(){
+	public void removeLimitYMin(){
 		minLocation.y = Float.NaN;
 	}
 	
 	/**
 	 * Remove the limits applied to the min z location of this entity.
 	 */
-	public void removeLimitLocationZMin(){
+	public void removeLimitZMin(){
 		minLocation.z = Float.NaN;
 	}
 	
 	/**
 	 * Remove the limits applied to the max x location of this entity.
 	 */
-	public void removeLimitLocationXMax(){
+	public void removeLimitXMax(){
 		maxLocation.x = Float.NaN;
 	}
 	
 	/**
 	 * Remove the limits applied to the max y location of this entity.
 	 */
-	public void removeLimitLocationYMax(){
+	public void removeLimitYMax(){
 		maxLocation.y = Float.NaN;
 	}
 	
 	/**
 	 * Remove the limits applied to the max z location of this entity.
 	 */
-	public void removeLimitLocationZMax(){
+	public void removeLimitZMax(){
 		maxLocation.z = Float.NaN;
 	}
 	
-	/**
-	 * Remove the limits applied to the x location of this entity.
-	 */
-	public void removeLimitLocationX(){
-		removeLimitLocationXMin();
-		removeLimitLocationXMax();
-	}
-	
-	/**
-	 * Remove the limits applied to the y location of this entity.
-	 */
-	public void removeLimitLocationY(){
-		removeLimitLocationYMin();
-		removeLimitLocationYMax();
-	}
-	
-	/**
-	 * Remove the limits applied to the z location of this entity.
-	 */
-	public void removeLimitLocationZ(){
-		removeLimitLocationZMin();
-		removeLimitLocationZMax();
-	}
-
 	/**
 	 * Remove the limits applied to this entity's velocity.
 	 */
@@ -1050,6 +1087,30 @@ abstract class GameObject implements Updatable {
 		minVelocity.set(Float.NaN, Float.NaN, Float.NaN);
 		maxVelocity.set(Float.NaN, Float.NaN, Float.NaN);
 		maxHorizontalVelocity = Float.NaN;
+	}
+
+	/**
+	 * Remove the limits applied to this entity's x velocity.
+	 */
+	public void removeLimitVelocityX(){
+		removeLimitVelocityXMin();
+		removeLimitVelocityXMax();
+	}
+
+	/**
+	 * Remove the limits applied to this entity's y velocity.
+	 */
+	public void removeLimitVelocityY(){
+		removeLimitVelocityYMin();
+		removeLimitVelocityYMax();
+	}
+
+	/**
+	 * Remove the limits applied to this entity's z velocity.
+	 */
+	public void removeLimitVelocityZ(){
+		removeLimitVelocityZMin();
+		removeLimitVelocityZMax();
 	}
 
 	/**
@@ -1095,72 +1156,9 @@ abstract class GameObject implements Updatable {
 	}
 	
 	/**
-	 * Remove the limits applied to this entity's x velocity.
-	 */
-	public void removeLimitVelocityX(){
-		removeLimitVelocityXMin();
-		removeLimitVelocityXMax();
-	}
-
-	/**
-	 * Remove the limits applied to this entity's y velocity.
-	 */
-	public void removeLimitVelocityY(){
-		removeLimitVelocityYMin();
-		removeLimitVelocityYMax();
-	}
-
-	/**
-	 * Remove the limits applied to this entity's z velocity.
-	 */
-	public void removeLimitVelocityZ(){
-		removeLimitVelocityZMin();
-		removeLimitVelocityZMax();
-	}
-
-	/**
 	 * Remove the limits applied to this entity's horizontal velocity.
 	 */
 	public void removeLimitVelocityHorizontal(){
 		this.maxHorizontalVelocity = Float.NaN;
-	}
-	
-	/**
-	 * Apply the limits the location of this entity.
-	 */
-	protected void applyLocationLimits() {
-		if (!Float.isNaN(minLocation.x)) location.x = Math.max(location.x - locationOffset.x, minLocation.x);
-		if (!Float.isNaN(minLocation.y)) location.y = Math.max(location.y - locationOffset.y, minLocation.y);
-		if (!Float.isNaN(minLocation.z)) location.z = Math.max(location.z - locationOffset.z, minLocation.z);
-
-		if (!Float.isNaN(maxLocation.x)) location.x = Math.min(location.x - locationOffset.x, maxLocation.x);
-		if (!Float.isNaN(maxLocation.y)) location.y = Math.min(location.y - locationOffset.y, maxLocation.y);
-		if (!Float.isNaN(maxLocation.z)) location.z = Math.min(location.z - locationOffset.z, maxLocation.z);
-	}
-	
-	/**
-	 * Apply the limits the motion of this entity.
-	 */
-	protected void applyMotionLimits() {
-		if (!Float.isNaN(minVelocity.x)) velocity.x = Math.max(velocity.x - velocityOffset.x, minVelocity.x);
-		if (!Float.isNaN(minVelocity.y)) velocity.y = Math.max(velocity.y - velocityOffset.y, minVelocity.y);
-		if (!Float.isNaN(minVelocity.z)) velocity.z = Math.max(velocity.z - velocityOffset.z, minVelocity.z);
-
-		if (!Float.isNaN(maxVelocity.x)) velocity.x = Math.min(velocity.x - velocityOffset.x, maxVelocity.x);
-		if (!Float.isNaN(maxVelocity.y)) velocity.y = Math.min(velocity.y - velocityOffset.y, maxVelocity.y);
-		if (!Float.isNaN(maxVelocity.z)) velocity.z = Math.min(velocity.z - velocityOffset.z, maxVelocity.z);
-
-		if(!Float.isNaN(maxHorizontalVelocity)){
-			PVector temp = velocity.copy();
-			temp.x += this.velocityOffset.x;
-			temp.y =  0;
-			temp.z += this.velocityOffset.z;
-			if(temp.mag() > maxHorizontalVelocity){
-				temp.normalize();
-				temp.mult(maxHorizontalVelocity);
-				velocity.x = temp.x;
-				velocity.z = temp.z;
-			}
-		}
 	}
 }
