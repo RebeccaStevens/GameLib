@@ -20,11 +20,11 @@ public class CameraStatic extends Camera {
 
 	public CameraStatic(Level level, PVector location, PVector rotation){
 		super(level);
-		this.location = location.copy();
-		this.rotation = rotation.copy();
+		setLocation(location);
+//		this.rotation = rotation.copy(); //TODO
 	}
 
 	@Override
-	public void update(double delta) {
+	public void update(float delta) {
 	}
 }

@@ -35,19 +35,19 @@ public class CameraFollowTwo extends Camera {
 	}
 
 	@Override
-	public void update(double delta) {
+	public void update(float delta) {
 		if(target1 == null || target2 == null) return;
-		PVector t1p = target1.getLocationInPixels();
-		PVector t2p = target2.getLocationInPixels();
+		PVector t1p = target1.getLocation();
+		PVector t2p = target2.getLocation();
 		PVector centroid = new PVector(
 				(t1p.x + t2p.x) / 2,
 				(t1p.y + t2p.y) / 2,
 				(t1p.z + t2p.z) / 2
 		);
-		location.set(centroid);
-		location.add(offsetPos);
+		setLocation(centroid);
+		addLocation(offsetPos);
 		
-		PVector rot = PVector.sub(centroid, location);
+		PVector rot = PVector.sub(centroid, getLocation());
 		rotation.set((float)Math.asin(rot.y/rot.mag()), (float)Math.atan(rot.x/rot.z), 0);
 		rotation.add(offsetAng);
 	}
