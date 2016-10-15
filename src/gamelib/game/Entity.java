@@ -312,9 +312,9 @@ public abstract class Entity implements Updatable, Drawable {
 		}
 		
 		return PVector.add(location, new PVector(
-				this.velocity.x + this.velocityOffset.x * delta,
-				this.velocity.y + this.velocityOffset.y * delta,
-				this.velocity.z + this.velocityOffset.z * delta));
+				(this.velocity.x + this.velocityOffset.x) * delta,
+				(this.velocity.y + this.velocityOffset.y) * delta,
+				(this.velocity.z + this.velocityOffset.z) * delta));
 	}
 	
 	/**
