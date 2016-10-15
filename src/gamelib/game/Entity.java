@@ -14,21 +14,21 @@ import processing.core.PVector;
 
 public abstract class Entity implements Updatable, Drawable {
 	
-	private PVector location;
-	private PVector velocity;
-	private PVector rotation;
-	private PVector scale;
+	private final PVector location;
+	private final PVector velocity;
+	private final PVector rotation;
+	private final PVector scale;
 	
-	private PVector locationOffset;
-	private PVector velocityOffset;
-	private PVector rotationOffset;
-	private PVector scaleOffset;
+	private final PVector locationOffset;
+	private final PVector velocityOffset;
+	private final PVector rotationOffset;
+	private final PVector scaleOffset;
 	
 	private float mass;
 	
-	private PVector maxLocation, minLocation;
-	private PVector maxVelocity, minVelocity;
-	private PVector maxRotation, minRotation;
+	private final PVector maxLocation, minLocation;
+	private final PVector maxVelocity, minVelocity;
+	private final PVector maxRotation, minRotation;
 	private float maxHorizontalVelocity = Float.NaN;
 	
 	private BoundingBox boundingBox;
@@ -43,8 +43,8 @@ public abstract class Entity implements Updatable, Drawable {
 	private Entity ground;
 
 	private Entity attachedTo;
-	private Set<Entity> attachedEntities;
-	private Set<Entity> entitiesOnMe;
+	private final Set<Entity> attachedEntities;
+	private final Set<Entity> entitiesOnMe;
 	
 	private int drawMode;
 	
@@ -144,12 +144,12 @@ public abstract class Entity implements Updatable, Drawable {
 		
 		this.ground = null;
 		
-		this.maxLocation = null;
-		this.minLocation = null;
-		this.maxVelocity = null;
-		this.minVelocity = null;
-		this.maxRotation = null;
-		this.minRotation = null;
+		this.maxLocation = new PVector(Float.NaN, Float.NaN, Float.NaN);
+		this.minLocation = new PVector(Float.NaN, Float.NaN, Float.NaN);
+		this.maxVelocity = new PVector(Float.NaN, Float.NaN, Float.NaN);
+		this.minVelocity = new PVector(Float.NaN, Float.NaN, Float.NaN);
+		this.maxRotation = new PVector(Float.NaN, Float.NaN, Float.NaN);
+		this.minRotation = new PVector(Float.NaN, Float.NaN, Float.NaN);
 	}
 
 	/**
