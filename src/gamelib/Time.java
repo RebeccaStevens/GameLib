@@ -29,6 +29,15 @@ public final class Time {
 	private long timeStamp = 0L;
 	
 	/**
+	 * Get a time stamp of the time the current frame started.
+	 * 
+	 * @return
+	 */
+	public long getTimeStamp() {
+		return timeStamp;
+	}
+	
+	/**
 	 * The amount of in-game time that has passed since the last frame.
 	 * 
 	 * @return The timeStep 
