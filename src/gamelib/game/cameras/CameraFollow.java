@@ -24,6 +24,6 @@ public class CameraFollow extends Camera {
 	@Override
 	public void update(double delta) {
 		if(target == null) return;
-		location.set(target.getLocation());
+		location.set(target.getLocationInPixels());
 	}
 }

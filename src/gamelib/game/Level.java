@@ -211,7 +211,7 @@ public abstract class Level implements Updatable, Drawable {
 			if(!needToCheckCollision(entity, ent)) continue;
 			BoundingBox thisbb = entity.getBoundingBox();
 			BoundingBox otherbb = ent.getBoundingBox();
-			float groundDist = 1;//TODO extract
+			float groundDist = 1F / 12F;//TODO extract
 			if (is3D()) {
 				if (otherbb.contains(new PVector(thisbb.getCenterX(), thisbb.getMaxY() + groundDist, thisbb.getCenterZ()))
 				||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMaxY() + groundDist, thisbb.getMinZ()))
@@ -221,9 +221,9 @@ public abstract class Level implements Updatable, Drawable {
 					return ent;
 				}
 			} else {
-				if (otherbb.contains(new PVector(thisbb.getCenterX(), thisbb.getMaxY() + groundDist))
-				||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMaxY() + groundDist))
-				||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMaxY() + groundDist))) {
+				if (otherbb.contains(new PVector(thisbb.getCenterX(), thisbb.getMinY() - groundDist))
+				||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMinY() - groundDist))
+				||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMinY() - groundDist))) {
 					return ent;
 				}				
 			}
@@ -455,36 +455,6 @@ public abstract class Level implements Updatable, Drawable {
 	 */
 	float convertGridUnitsZToPixels(float gameUnits) {
 		return convertGridUnitsXToPixels(gameUnits);
-	}
-	
-	/**
-	 * Convert game units (for x movement) to pixels.
-	 * 
-	 * @param gameUnits
-	 * @return
-	 */
-	float convertGridUnitsVelocityXToPixels(float gameUnits) {
-		return this.zoom * gameUnits * GameManager.getMe().getGameScene().getGameWidth() / this.gridWidth;
-	}
-	
-	/**
-	 * Convert game units (for y movement) to pixels.
-	 * 
-	 * @param gameUnits
-	 * @return
-	 */
-	float convertGridUnitsVelocityYToPixels(float gameUnits) {
-		return -(this.zoom * gameUnits * GameManager.getMe().getGameScene().getGameHeight() / this.gridHeight);
-	}
-	
-	/**
-	 * Convert game units (for z movement) to pixels.
-	 * 
-	 * @param gameUnits
-	 * @return
-	 */
-	float convertGridUnitsVelocityZToPixels(float gameUnits) {
-		return convertGridUnitsVelocityXToPixels(gameUnits);
 	}
 
 	/**

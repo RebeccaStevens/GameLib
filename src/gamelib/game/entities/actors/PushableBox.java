@@ -50,11 +50,11 @@ public class PushableBox extends PushableEntity {
 	
 	private void draw2D(PGraphics g) {
 		style.apply(g);
-		g.rect(0, 0, getWidth(), getHeight());
+		g.rect(0, 0, getWidthInPixels(), getHeightInPixels());
 	}
 	
 	private void draw3D(PGraphics g) {
 		style.apply(g);
-		g.box(getWidth(), getHeight(), getDepth());
+		g.box(getWidthInPixels(), getHeightInPixels(), getDepthInPixels());
 	}
 }

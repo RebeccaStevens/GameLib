@@ -37,8 +37,8 @@ public class CameraFollowTwo extends Camera {
 	@Override
 	public void update(double delta) {
 		if(target1 == null || target2 == null) return;
-		PVector t1p = target1.getLocation();
-		PVector t2p = target2.getLocation();
+		PVector t1p = target1.getLocationInPixels();
+		PVector t2p = target2.getLocationInPixels();
 		PVector centroid = new PVector(
 				(t1p.x + t2p.x) / 2,
 				(t1p.y + t2p.y) / 2,

@@ -8,7 +8,6 @@ import gamelib.Drawable;
 import gamelib.GameManager;
 import gamelib.Updatable;
 import gamelib.game.entities.PushableEntity;
-import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PVector;
@@ -108,22 +107,14 @@ public abstract class Entity implements Updatable, Drawable {
 	 */
 	public Entity(Level level, float x, float y, float z, float width, float height, float depth, int drawMode) {
 		setLevel(level);
-		this.location = new PVector(
-				level.convertGridUnitsXToPixels(x),
-				level.convertGridUnitsYToPixels(y),
-				level.convertGridUnitsZToPixels(z));
+		this.location = new PVector(x, y, z);
 		this.velocity = new PVector();
 		this.rotation = new PVector();
 		
 		if (level.is3D()) {
-			this.boundingBox = new BoundingBox3D(this,
-					level.convertGridUnitsWidthToPixels(width),
-					level.convertGridUnitsHeightToPixels(height),
-					level.convertGridUnitsDepthToPixels(depth));
+			this.boundingBox = new BoundingBox3D(this, width, height, depth);
 		} else {
-			this.boundingBox = new BoundingBox2D(this,
-					level.convertGridUnitsWidthToPixels(width),
-					level.convertGridUnitsHeightToPixels(height));
+			this.boundingBox = new BoundingBox2D(this, width, height);
 		}
 		
 		this.scale = new PVector(1, 1, 1);
@@ -132,15 +123,12 @@ public abstract class Entity implements Updatable, Drawable {
 		this.velocityOffset = new PVector();
 		this.rotationOffset = new PVector();
 		this.scaleOffset = new PVector();
-		
+
+		this.drawMode = drawMode;
 		if (drawMode == PConstants.CENTER) {
-			this.drawMode = drawMode;
+			
 		} else if (drawMode == PConstants.CORNER) {
-			this.drawMode = drawMode;
-			this.location.add(
-					level.convertGridUnitsWidthToPixels(width / 2),
-					level.convertGridUnitsHeightToPixels(height / 2),
-					level.convertGridUnitsDepthToPixels(depth / 2));
+			this.location.add(width / 2, height / 2, depth / 2);
 		} else {
 			throw new InvalidParameterException("Only CENTER and CORNER draw modes are supported.");
 		}
@@ -211,11 +199,11 @@ public abstract class Entity implements Updatable, Drawable {
 		for(Entity ent : attachedEntities){
 			if(!ent.updateAttached(delta)) allChildrenCanMove = false;
 		}
-
-		PVector currentLocation = PVector.add(this.location, this.locationOffset);
-		PVector newLocation = getMoveToLocation(delta);
 		
 		if(allChildrenCanMove){
+			PVector currentLocation = PVector.add(this.location, this.locationOffset);
+			PVector newLocation = getMoveToLocation(delta);
+			
 			if(!move(newLocation, currentLocation)){
 				if(!move(new PVector(newLocation.x, currentLocation.y, currentLocation.z), currentLocation)){ velocity.x = 0; velocityOffset.x = 0; }
 				if(!move(new PVector(currentLocation.x, currentLocation.y, newLocation.z), currentLocation)){ velocity.z = 0; velocityOffset.y = 0; }
@@ -226,14 +214,6 @@ public abstract class Entity implements Updatable, Drawable {
 		applyLocationLimits();
 		groundDetection();
 	}
-
-	/**
-	 * Update the entity.
-	 * 
-	 * @param delta The amount of game time that has passed since the last frame
-	 */
-	@Override
-	public abstract void update(float delta);
 
 	private final boolean updateAttached(float delta){
 		assert(attachedTo == null);
@@ -308,9 +288,9 @@ public abstract class Entity implements Updatable, Drawable {
 		this.velocity.mult(1-resistance);
 		this.velocityOffset.mult(1-resistance);
 		((Entity)(pushee)).velocity.add(
-				this.level.convertGridUnitsVelocityXToPixels(this.velocity.x + this.velocityOffset.x),
-				this.level.convertGridUnitsVelocityYToPixels(this.velocity.y + this.velocityOffset.y),
-				this.level.convertGridUnitsVelocityZToPixels(this.velocity.z + this.velocityOffset.z));
+				this.velocity.x + this.velocityOffset.x,
+				this.velocity.y + this.velocityOffset.y,
+				this.velocity.z + this.velocityOffset.z);
 		
 		return true;
 	}
@@ -325,16 +305,16 @@ public abstract class Entity implements Updatable, Drawable {
 		boolean onGround = isOnGround();
 		
 		if(gravityEffected && !onGround){
-			applyAcceleration(level.getGravity(), level.getAirFriction());
+			applyAcceleration(level.getGravity(), level.getAirFriction(), delta);
 		}
 		if(onGround){
-			applyAcceleration(0, 0, 0, ground.getGroundFriction());
+			applyAcceleration(0, 0, 0, ground.getGroundFriction(), delta);
 		}
 		
 		return PVector.add(location, new PVector(
-				this.level.convertGridUnitsVelocityXToPixels(this.velocity.x + this.velocityOffset.x) * delta,
-				this.level.convertGridUnitsVelocityYToPixels(this.velocity.y + this.velocityOffset.y) * delta,
-				this.level.convertGridUnitsVelocityZToPixels(this.velocity.z + this.velocityOffset.z) * delta));
+				this.velocity.x + this.velocityOffset.x * delta,
+				this.velocity.y + this.velocityOffset.y * delta,
+				this.velocity.z + this.velocityOffset.z * delta));
 	}
 	
 	/**
@@ -347,13 +327,18 @@ public abstract class Entity implements Updatable, Drawable {
 		if(this.level == null) return;
 		g.pushMatrix();
 		if (this.level.is3D()) {
-			g.translate(this.location.x + this.locationOffset.x, this.location.y + this.locationOffset.y, this.location.z + this.locationOffset.z);
+			g.translate(
+					level.convertGridUnitsXToPixels(this.location.x + this.locationOffset.x),
+					level.convertGridUnitsYToPixels(this.location.y + this.locationOffset.y),
+					level.convertGridUnitsZToPixels(this.location.z + this.locationOffset.z));
 			g.rotateX(this.rotation.x + this.rotationOffset.x);
 			g.rotateY(this.rotation.y + this.rotationOffset.y);
 			g.rotateZ(this.rotation.z + this.rotationOffset.z);
 			g.scale(this.scale.x + this.scaleOffset.x, this.scale.y + this.scaleOffset.y, this.scale.z + this.scaleOffset.z);
 		} else {
-			g.translate(this.boundingBox.getCenterX() + this.locationOffset.x, this.boundingBox.getCenterY() + this.locationOffset.y);
+			g.translate(
+					level.convertGridUnitsXToPixels(this.boundingBox.getCenterX() + this.locationOffset.x),
+					level.convertGridUnitsYToPixels(this.boundingBox.getCenterY() + this.locationOffset.y));
 			g.rotate(this.rotation.x + this.rotationOffset.x);
 			g.scale(this.scale.x + this.scaleOffset.x, this.scale.y + this.scaleOffset.y);
 		}
@@ -387,10 +372,10 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param g The graphics object to draw to
 	 */
 	private void drawBoundingBox2D(PGraphics g) {
-		float bbx = this.boundingBox.getCenterX();
-		float bby = this.boundingBox.getCenterY();
-		float bbw = this.boundingBox.getWidth();
-		float bbh = this.boundingBox.getHeight();
+		float bbx = level.convertGridUnitsXToPixels(this.boundingBox.getCenterX());
+		float bby = level.convertGridUnitsYToPixels(this.boundingBox.getCenterY());
+		float bbw = level.convertGridUnitsWidthToPixels(this.boundingBox.getWidth());
+		float bbh = level.convertGridUnitsHeightToPixels(this.boundingBox.getHeight());
 		
 		g.pushStyle();
 		g.rectMode(PConstants.CENTER);
@@ -437,10 +422,11 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param fx X force
 	 * @param fy Y force
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
+	 * @param time The amount of time to apply the force for
 	 * @return The distance traveled be the entity
 	 */
-	public PVector applyForce(float fx, float fy, float friction){
-		return applyForce(fx, fy, 0, friction);
+	public PVector applyForce(float fx, float fy, float friction, float time){
+		return applyForce(fx, fy, 0, friction, time);
 	}
 	
 	/**
@@ -450,10 +436,11 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param fy Y force
 	 * @param fz Z force
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
+	 * @param time The amount of time to apply the force for
 	 * @return The distance traveled be the entity
 	 */
-	public PVector applyForce(float fx, float fy, float fz, float friction){
-		return applyForce(new PVector(fx/mass, fy/mass, fz/mass), friction);
+	public PVector applyForce(float fx, float fy, float fz, float friction, float time){
+		return applyForce(new PVector(fx/mass, fy/mass, fz/mass), friction, time);
 	}
 	
 	/**
@@ -461,10 +448,11 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @param f The force to apply
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
+	 * @param time The amount of time to apply the force for
 	 * @return The distance traveled be the entity
 	 */
-	public PVector applyForce(PVector f, float friction){
-		return accelerate(velocity, PVector.div(f, mass), friction);
+	public PVector applyForce(PVector f, float friction, float time){
+		return accelerate(velocity, PVector.div(f, mass), friction, time);
 	}
 	
 	/**
@@ -473,10 +461,11 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param ax X acceleration
 	 * @param ay Y acceleration
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
+	 * @param time The amount of time to accelerate for
 	 * @return The distance traveled be the entity
 	 */
-	public PVector applyAcceleration(float ax, float ay, float friction){
-		return applyAcceleration(ax, ay, 0, friction);
+	public PVector applyAcceleration(float ax, float ay, float friction, float time){
+		return applyAcceleration(ax, ay, 0, friction, time);
 	}
 	
 	/**
@@ -486,10 +475,11 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param ay Y acceleration
 	 * @param az Z acceleration
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
+	 * @param time The amount of time to accelerate for
 	 * @return The distance traveled be the entity
 	 */
-	public PVector applyAcceleration(float ax, float ay, float az, float friction){
-		return applyAcceleration(new PVector(ax, ay, az), friction);
+	public PVector applyAcceleration(float ax, float ay, float az, float friction, float time){
+		return applyAcceleration(new PVector(ax, ay, az), friction, time);
 	}
 	
 	/**
@@ -499,8 +489,8 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param a The acceleration to apply
 	 * @return The distance traveled be the entity
 	 */
-	public PVector applyAcceleration(PVector a){
-		return applyAcceleration(a, 0);
+	public PVector applyAcceleration(PVector a, float time){
+		return applyAcceleration(a, 0, time);
 	}
 	
 	/**
@@ -508,10 +498,11 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @param a The acceleration to apply
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
+	 * @param time The amount of time to accelerate for
 	 * @return The distance traveled be the entity
 	 */
-	public PVector applyAcceleration(PVector a, float friction){
-		return accelerate(velocity, a, friction);
+	public PVector applyAcceleration(PVector a, float friction, float time){
+		return accelerate(velocity, a, friction, time);
 	}
 	
 	public void addLocation(float x, float y) {
@@ -544,22 +535,21 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param veloc The velocity to accelerate
 	 * @param accel The amount if acceleration
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
+	 * @param time The amount of time to accelerate for
 	 * @return The distance traveled
 	 */
-	public static PVector accelerate(PVector velocity, PVector acceleration, float friction){
-		PVector delta;
-		float time_step = GameManager.getMe().getTime().getTimeStep();
+	public static PVector accelerate(PVector velocity, PVector acceleration, float friction, float time) {
+		PVector distance;
 
 		if (friction == 0) {
-			delta = PVector.add(PVector.mult(velocity, time_step), PVector.mult(acceleration, 0.5F * time_step * time_step));
-			velocity.add(PVector.mult(acceleration, time_step));
-		}
-		else {
-			delta = PVector.add(PVector.mult(acceleration, time_step / friction), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) ((1 - Math.exp(-friction * time_step)) / friction)));
-			velocity.set(PVector.add(PVector.div(acceleration, friction), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) Math.exp(-friction * time_step))));
+			distance = PVector.add(PVector.mult(velocity, time), PVector.mult(acceleration, 0.5F * time * time));
+			velocity.add(PVector.mult(acceleration, time));
+		} else {
+			distance = PVector.add(PVector.mult(acceleration, time / friction), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) ((1 - Math.exp(-friction * time)) / friction)));
+			velocity.set(PVector.add(PVector.div(acceleration, friction), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) Math.exp(-friction * time))));
 		}
 		
-		return delta;
+		return distance;
 	}
 	
 	public void attach(Entity entity){
@@ -610,7 +600,7 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
-	 * Get the x location of this entity.
+	 * Get the x location of this entity (in grid units).
 	 * 
 	 * @return the x location
 	 */
@@ -619,7 +609,16 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
-	 * Get the y location of this entity.
+	 * Get the x location of this entity (in pixels).
+	 * 
+	 * @return the x location
+	 */
+	public float getXInPixels(){
+		return level.convertGridUnitsXToPixels(location.x);
+	}
+
+	/**
+	 * Get the y location of this entity (in grid units).
 	 * 
 	 * @return the y location
 	 */
@@ -628,7 +627,16 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
-	 * Get the z location of this entity.
+	 * Get the y location of this entity (in pixels).
+	 * 
+	 * @return the y location
+	 */
+	public float getYInPixels(){
+		return level.convertGridUnitsYToPixels(location.y);
+	}
+
+	/**
+	 * Get the z location of this entity (in grid units).
 	 * 
 	 * @return the z location
 	 */
@@ -637,7 +645,16 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
-	 * Get the location of this entity.
+	 * Get the z location of this entity (in pixels).
+	 * 
+	 * @return the z location
+	 */
+	public float getZInPixels(){
+		return level.convertGridUnitsZToPixels(location.z);
+	}
+
+	/**
+	 * Get the location of this entity (in grid units).
 	 * 
 	 * @return the location
 	 */
@@ -646,16 +663,88 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
-	 * Get the location offset of this entity.
+	 * Get the location of this entity (in pixels).
+	 * 
+	 * @return the location
+	 */
+	public PVector getLocationInPixels(){
+		return new PVector(getXInPixels(), getYInPixels(), getZInPixels());
+	}
+	
+	/**
+	 * Get the x location offset of this entity (in grid units).
+	 * 
+	 * @return the x location
+	 */
+	public float getXOffset(){
+		return locationOffset.x;
+	}
+
+	/**
+	 * Get the x location offset of this entity (in pixels).
+	 * 
+	 * @return the x location
+	 */
+	public float getXOffsetInPixels(){
+		return level.convertGridUnitsXToPixels(locationOffset.x);
+	}
+
+	/**
+	 * Get the y location offset of this entity (in grid units).
+	 * 
+	 * @return the y location
+	 */
+	public float getYOffset(){
+		return locationOffset.y;
+	}
+
+	/**
+	 * Get the y location offset of this entity (in pixels).
+	 * 
+	 * @return the y location
+	 */
+	public float getYOffsetInPixels(){
+		return level.convertGridUnitsYToPixels(locationOffset.y);
+	}
+
+	/**
+	 * Get the z location offset of this entity (in grid units).
+	 * 
+	 * @return the z location
+	 */
+	public float getZOffset(){
+		return locationOffset.z;
+	}
+
+	/**
+	 * Get the z location offset of this entity (in pixels).
+	 * 
+	 * @return the z location
+	 */
+	public float getZOffsetInPixels(){
+		return level.convertGridUnitsZToPixels(locationOffset.z);
+	}
+
+	/**
+	 * Get the location offset of this entity (in grid units).
 	 * 
 	 * @return the location offset
 	 */
 	public PVector getLocationOffset(){
 		return locationOffset.copy();
 	}
+	
+	/**
+	 * Get the location offset of this entity (in pixels).
+	 * 
+	 * @return the location offset
+	 */
+	public PVector getLocationOffsetInPixels(){
+		return new PVector(getXOffsetInPixels(), getYOffsetInPixels(), getZOffsetInPixels());
+	}
 
 	/**
-	 * Get the width of this entity.
+	 * Get the width of this entity (in grid units).
 	 * 
 	 * @return the width
 	 */
@@ -664,7 +753,16 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
-	 * Get the height of this entity.
+	 * Get the width of this entity (in pixels).
+	 * 
+	 * @return the width
+	 */
+	public float getWidthInPixels() {
+		return level.convertGridUnitsWidthToPixels(boundingBox.getWidth());
+	}
+
+	/**
+	 * Get the height of this entity (in grid units).
 	 * 
 	 * @return the height
 	 */
@@ -673,7 +771,16 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
-	 * Get the depth of this entity.
+	 * Get the height of this entity (in pixels).
+	 * 
+	 * @return the height
+	 */
+	public float getHeightInPixels() {
+		return level.convertGridUnitsHeightToPixels(boundingBox.getHeight());
+	}
+
+	/**
+	 * Get the depth of this entity (in grid units).
 	 * 
 	 * @return the depth
 	 */
@@ -682,12 +789,30 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
-	 * Get the location of this entity.
+	 * Get the depth of this entity (in pixels).
+	 * 
+	 * @return the depth
+	 */
+	public float getDepthInPixels(){
+		return level.convertGridUnitsDepthToPixels(boundingBox.getDepth());
+	}
+
+	/**
+	 * Get the size of this entity (in grid units).
 	 * 
 	 * @return the location
 	 */
 	public PVector getSize(){
 		return new PVector(getWidth(), getHeight(), getDepth());
+	}
+	
+	/**
+	 * Get the size of this entity (in pixels).
+	 * 
+	 * @return the location
+	 */
+	public PVector getSizeInPixels(){
+		return new PVector(getWidthInPixels(), getHeightInPixels(), getDepthInPixels());
 	}
 
 	/**
