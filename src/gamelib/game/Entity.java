@@ -49,47 +49,54 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	private int drawMode;
 	
-	enum CollisionMode{
+	enum CollisionMode {
 		GREATER_THAN_OR_EQUAL_TO, EQUAL_TO, LESS_THAN;
 	}
 
 	/**
-	 * Create a 2D Entity
+	 * Create a 2D Entity.
+	 * 
 	 * @param level The level the entity will exist in
 	 * @param x The x location
 	 * @param y The y location
 	 * @param width The width
 	 * @param height The height
+	 * @param drawMode The draw mode of this entity
 	 */
-	public Entity(Level level, float x, float y, float width, float height, int drawMode){
+	public Entity(Level level, float x, float y, float width, float height, int drawMode) {
 		this(level, x, y, 0, width, height, 0, drawMode);
 	}
 	
 	/**
-	 * Create a 2D Entity
+	 * Create a 2D Entity.
+	 * 
 	 * @param level The level the entity will exist in
 	 * @param location The location of this entity
 	 * @param width The width
 	 * @param height The height
+	 * @param drawMode The draw mode of this entity
 	 */
-	public Entity(Level level, PVector location, float width, float height, int drawMode){
+	public Entity(Level level, PVector location, float width, float height, int drawMode) {
 		this(level, location.x, location.y, 0, width, 1, height, drawMode);
 	}
 	
 	/**
-	 * Create a 3D Entity
+	 * Create a 3D Entity.
+	 * 
 	 * @param level The level the entity will exist in
 	 * @param location The location of this entity
 	 * @param width The width
 	 * @param height The height
 	 * @param depth The depth
+	 * @param drawMode The draw mode of this entity
 	 */
-	public Entity(Level level, PVector location, float width, float height, float depth, int drawMode){
+	public Entity(Level level, PVector location, float width, float height, float depth, int drawMode) {
 		this(level, location.x, location.y, location.z, width, height, depth, drawMode);
 	}
 	
 	/**
-	 * Create a 3D Entity
+	 * Create a 3D Entity.
+	 * 
 	 * @param level The level the entity will exist in
 	 * @param x The x location
 	 * @param y The y location
@@ -97,6 +104,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param width The width
 	 * @param height The height
 	 * @param depth The depth
+	 * @param drawMode The draw mode of this entity
 	 */
 	public Entity(Level level, float x, float y, float z, float width, float height, float depth, int drawMode) {
 		setLevel(level);
@@ -158,13 +166,13 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Set the level that this entity is in.
+	 * 
 	 * @param level
 	 */
-	private void setLevel(Level level){
-		if(level == null){
+	private void setLevel(Level level) {
+		if(level == null) {
 			remove();
-		}
-		else{
+		} else {
 			this.level = level;
 			level.addEntity(this);
 		}
@@ -187,7 +195,8 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Update the entity.
-	 * This method calls the method: update(float delta)
+	 * This method calls {@link #update(float)}.
+	 * 
 	 * @param delta The amount of game time that has passed since the last frame
 	 */
 	final void _update(float delta){
@@ -220,8 +229,10 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Update the entity.
+	 * 
 	 * @param delta The amount of game time that has passed since the last frame
 	 */
+	@Override
 	public abstract void update(float delta);
 
 	private final boolean updateAttached(float delta){
@@ -240,7 +251,8 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
-	 * Try and move this entity to the given location
+	 * Try and move this entity to the given location.
+	 * 
 	 * @param newLocation
 	 * @return whether or not the move was successful
 	 */
@@ -305,6 +317,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Move the entity.
+	 * 
 	 * @param delta The amount of game time that has passed since the last frame
 	 * @return The location that the entity will move to
 	 */
@@ -326,7 +339,8 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Draw the entity.
-	 * This method calls the method: draw(delta)
+	 * This method calls {@link #draw(PGraphics)}.
+	 * 
 	 * @param g The graphics object to draw to
 	 */
 	final void _draw(PGraphics g){
@@ -356,6 +370,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Draw a bounding box around the entity.
+	 * 
 	 * @param g The graphics object to draw to
 	 */
 	private void drawBoundingBox(PGraphics g) {
@@ -368,6 +383,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Draw a 2D bounding box around the entity.
+	 * 
 	 * @param g The graphics object to draw to
 	 */
 	private void drawBoundingBox2D(PGraphics g) {
@@ -377,7 +393,7 @@ public abstract class Entity implements Updatable, Drawable {
 		float bbh = this.boundingBox.getHeight();
 		
 		g.pushStyle();
-		g.rectMode(PApplet.CENTER);
+		g.rectMode(PConstants.CENTER);
 		g.noFill();
 		
 		g.stroke(0xFFFFFFFF);
@@ -392,6 +408,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Draw a 3D bounding box around the entity.
+	 * 
 	 * @param g The graphics object to draw to
 	 */
 	private void drawBoundingBox3D(PGraphics g) {
@@ -416,6 +433,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Apply a force on the entity.
+	 * 
 	 * @param fx X force
 	 * @param fy Y force
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
@@ -427,6 +445,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Apply a force on the entity.
+	 * 
 	 * @param fx X force
 	 * @param fy Y force
 	 * @param fz Z force
@@ -439,6 +458,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Apply a force on the entity.
+	 * 
 	 * @param f The force to apply
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
 	 * @return The distance traveled be the entity
@@ -449,6 +469,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Apply an acceleration to the entity.
+	 * 
 	 * @param ax X acceleration
 	 * @param ay Y acceleration
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
@@ -460,6 +481,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Apply an acceleration to the entity.
+	 * 
 	 * @param ax X acceleration
 	 * @param ay Y acceleration
 	 * @param az Z acceleration
@@ -472,6 +494,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Apply an acceleration to the entity.
+	 * 
 	 * No friction will be applied to the acceleration.
 	 * @param a The acceleration to apply
 	 * @return The distance traveled be the entity
@@ -482,6 +505,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Apply an acceleration to the entity.
+	 * 
 	 * @param a The acceleration to apply
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
 	 * @return The distance traveled be the entity
@@ -516,6 +540,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Accelerate the given velocity by the given acceleration, applying the give amount of friction.
+	 * 
 	 * @param veloc The velocity to accelerate
 	 * @param accel The amount if acceleration
 	 * @param friction The amount of friction to apply (should be between 0 and 1 though can be greater)
@@ -526,11 +551,11 @@ public abstract class Entity implements Updatable, Drawable {
 		float time_step = GameManager.getMe().getTime().getTimeStep();
 
 		if (friction == 0) {
-			delta = PVector.add(PVector.mult(velocity, (float) time_step), PVector.mult(acceleration, (float) (0.5F * time_step * time_step)));
-			velocity.add(PVector.mult(acceleration, (float) time_step));
+			delta = PVector.add(PVector.mult(velocity, time_step), PVector.mult(acceleration, 0.5F * time_step * time_step));
+			velocity.add(PVector.mult(acceleration, time_step));
 		}
 		else {
-			delta = PVector.add(PVector.mult(acceleration, (float) (time_step / friction)), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) ((1 - Math.exp(-friction * time_step)) / friction)));
+			delta = PVector.add(PVector.mult(acceleration, time_step / friction), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) ((1 - Math.exp(-friction * time_step)) / friction)));
 			velocity.set(PVector.add(PVector.div(acceleration, friction), PVector.mult(PVector.sub(velocity, PVector.div(acceleration, friction)), (float) Math.exp(-friction * time_step))));
 		}
 		
@@ -554,7 +579,8 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 	
 	/**
-	 * Put on to me
+	 * Put the given entity on me.
+	 * 
 	 * @param entity
 	 */
 	private void putOn(Entity entity){
@@ -564,7 +590,8 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 	
 	/**
-	 * Take off of me
+	 * Take the given entity off of me.
+	 * 
 	 * @param entity
 	 */
 	private void takeOff(Entity entity){
@@ -574,7 +601,8 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 	
 	/**
-	 * Get the level that this entity is in.
+	 * Get the level that this entity is apart of.
+	 * 
 	 * @return the level
 	 */
 	public final Level getLevel(){
@@ -583,6 +611,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the x location of this entity.
+	 * 
 	 * @return the x location
 	 */
 	public float getX(){
@@ -591,6 +620,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the y location of this entity.
+	 * 
 	 * @return the y location
 	 */
 	public float getY(){
@@ -599,6 +629,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the z location of this entity.
+	 * 
 	 * @return the z location
 	 */
 	public float getZ(){
@@ -607,6 +638,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the location of this entity.
+	 * 
 	 * @return the location
 	 */
 	public PVector getLocation(){
@@ -615,6 +647,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the location offset of this entity.
+	 * 
 	 * @return the location offset
 	 */
 	public PVector getLocationOffset(){
@@ -623,6 +656,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the width of this entity.
+	 * 
 	 * @return the width
 	 */
 	public float getWidth() {
@@ -631,6 +665,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the height of this entity.
+	 * 
 	 * @return the height
 	 */
 	public float getHeight() {
@@ -639,6 +674,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the depth of this entity.
+	 * 
 	 * @return the depth
 	 */
 	public float getDepth(){
@@ -647,6 +683,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the location of this entity.
+	 * 
 	 * @return the location
 	 */
 	public PVector getSize(){
@@ -655,6 +692,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the x velocity of this entity.
+	 * 
 	 * @return the x velocity
 	 */
 	public float getVelocityX(){
@@ -663,6 +701,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the y velocity of this entity.
+	 * 
 	 * @return the y velocity
 	 */
 	public float getVelocityY(){
@@ -671,6 +710,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the z velocity of this entity.
+	 * 
 	 * @return the z velocity
 	 */
 	public float getVelocityZ(){
@@ -679,6 +719,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the velocity of this entity.
+	 * 
 	 * @return the velocity
 	 */
 	public PVector getVelocity(){
@@ -687,6 +728,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the velocity offset of this entity.
+	 * 
 	 * @return the velocity offset
 	 */
 	public PVector getVelocityOffset(){
@@ -695,6 +737,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the tilt rotation of this entity.
+	 * 
 	 * @return the tilt rotation
 	 */
 	public float getRotationTilt(){
@@ -703,6 +746,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the pan rotation of this entity.
+	 * 
 	 * @return the pan rotation
 	 */
 	public float getRotationPan(){
@@ -711,6 +755,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the roll rotation of this entity.
+	 * 
 	 * @return the roll rotation
 	 */
 	public float getRotationRoll(){
@@ -719,6 +764,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the rotation of this entity.
+	 * 
 	 * @return the rotation
 	 */
 	public float getRotation2D(){
@@ -727,6 +773,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the rotation of this entity (tilt, pan, roll).
+	 * 
 	 * @return the rotation
 	 */
 	public PVector getRotation3D(){
@@ -735,6 +782,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the rotation of this entity.
+	 * 
 	 * @return the rotation
 	 */
 	public float getRotationOffset2D(){
@@ -743,6 +791,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the rotation of this entity (tilt, pan, roll).
+	 * 
 	 * @return the rotation
 	 */
 	public PVector getRotationOffset3D(){
@@ -751,6 +800,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the x scale of this entity.
+	 * 
 	 * @return The x scale
 	 */
 	public float getScaleX(){
@@ -759,6 +809,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Get the x scale of this entity.
+	 * 
 	 * @return The x scale
 	 */
 	public float getScaleY(){
@@ -767,6 +818,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the z scale of this entity.
+	 * 
 	 * @return The z scale
 	 */
 	public float getScaleZ(){
@@ -775,6 +827,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the scale of this entity.
+	 * 
 	 * @return The scale
 	 */
 	public PVector getScale(){
@@ -783,6 +836,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the scale of this entity.
+	 * 
 	 * @return The scale
 	 */
 	public PVector getScaleOffset(){
@@ -791,6 +845,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the mass of this entity.
+	 * 
 	 * @return The mass
 	 */
 	public float getMass() {
@@ -803,6 +858,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the bounding box used by this entity.
+	 * 
 	 * @return
 	 */
 	BoundingBox getBoundingBox() {
@@ -811,6 +867,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the bounding box used by this entity.
+	 * 
 	 * @return
 	 */
 	public BoundingBox3D getBoundingBox3D() {
@@ -820,6 +877,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the bounding box used by this entity.
+	 * 
 	 * @return
 	 */
 	public BoundingBox2D getBoundingBox2D() {
@@ -829,6 +887,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the collision group of this entity.
+	 * 
 	 * @return
 	 */
 	int getCollisionGroup() {
@@ -837,6 +896,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Get the collision mode that this entity uses.
+	 * 
 	 * @return
 	 */
 	CollisionMode getCollisionMode() {
@@ -856,6 +916,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Returns whether or not this entity is on the ground.
+	 * 
 	 * @return
 	 */
 	public boolean isOnGround() {
@@ -864,6 +925,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Set the x location of the entity.
+	 * 
 	 * @param x
 	 */
 	public void setLocationX(float x){
@@ -872,6 +934,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the y location of the entity.
+	 * 
 	 * @param y
 	 */
 	public void setLocationY(float y){
@@ -881,6 +944,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the z location of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param z
 	 */
 	public void setLocationZ(float z){
@@ -890,6 +954,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the location of the entity.
 	 * (For 2D games only)
+	 * 
 	 * @param x
 	 * @param y
 	 */
@@ -900,6 +965,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the location of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param x
 	 * @param y
 	 * @param z
@@ -910,6 +976,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Set the location of the entity.
+	 * 
 	 * @param loc
 	 */
 	public void setLocation(PVector loc){
@@ -918,6 +985,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Set the x location offset of the entity.
+	 * 
 	 * @param x
 	 */
 	public void setLocationOffsetX(float x){
@@ -926,6 +994,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the y location offset of the entity.
+	 * 
 	 * @param y
 	 */
 	public void setLocationOffsetY(float y){
@@ -934,6 +1003,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the z location offset of the entity.
+	 * 
 	 * (For 3D games only)
 	 * @param z
 	 */
@@ -944,6 +1014,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the location offset of the entity.
 	 * (For 2D games only)
+	 * 
 	 * @param x
 	 * @param y
 	 */
@@ -954,6 +1025,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the location offset of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param x
 	 * @param y
 	 * @param z
@@ -964,6 +1036,7 @@ public abstract class Entity implements Updatable, Drawable {
 
 	/**
 	 * Set the location offset of the entity.
+	 * 
 	 * @param loc
 	 */
 	public void setLocationOffset(PVector loc){
@@ -972,6 +1045,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the x speed of the entity.
+	 * 
 	 * @param vx
 	 */
 	public void setVelocityX(float vx){
@@ -980,6 +1054,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the y speed of the entity.
+	 * 
 	 * @param vy
 	 */
 	public void setVelocityY(float vy){
@@ -989,6 +1064,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the z speed of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param vz
 	 */
 	public void setVelocityZ(float vz){
@@ -998,6 +1074,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the speed of the entity.
 	 * (For 2D games only)
+	 * 
 	 * @param vx
 	 * @param vy
 	 */
@@ -1008,6 +1085,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the speed of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param vx
 	 * @param vy
 	 * @param vz
@@ -1018,6 +1096,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the speed of the entity.
+	 * 
 	 * @param v
 	 */
 	public void setVelocity(PVector v){
@@ -1026,6 +1105,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the x velocity offset of the entity.
+	 * 
 	 * @param vx
 	 */
 	public void setVelocityOffsetX(float vx){
@@ -1034,6 +1114,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the y velocity offset of the entity.
+	 * 
 	 * @param vy
 	 */
 	public void setVelocityOffsetY(float vy){
@@ -1043,6 +1124,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the z velocity offset of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param vz
 	 */
 	public void setVelocityOffsetZ(float vz){
@@ -1052,6 +1134,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the velocity offset of the entity.
 	 * (For 2D games only)
+	 * 
 	 * @param vx
 	 * @param vy
 	 */
@@ -1062,6 +1145,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the velocity offset of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param vx
 	 * @param vy
 	 * @param vz
@@ -1072,6 +1156,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the velocity offset of the entity.
+	 * 
 	 * @param v
 	 */
 	public void setVelocityOffset(PVector v){
@@ -1082,6 +1167,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * Set the tilt rotation of the entity.
 	 * This is the rotation in the xy plain.
 	 * (For 3D games only)
+	 * 
 	 * @param tilt
 	 */
 	public void setRotationTilt(float tilt){
@@ -1092,6 +1178,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * Set the pan rotation of the entity.
 	 * This is the rotation in the xz plain.
 	 * (For 3D games only)
+	 * 
 	 * @param pan
 	 */
 	public void setRotationPan(float pan){
@@ -1102,6 +1189,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * Set the roll rotation of the entity.
 	 * This is the rotation in the yz plain.
 	 * (For 3D games only)
+	 * 
 	 * @param roll
 	 */
 	public void setRotationRoll(float roll){
@@ -1111,6 +1199,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the rotation of the entity.
 	 * (For 2D games only)
+	 * 
 	 * @param rotation
 	 */
 	public void setRotation(float rotation){
@@ -1120,6 +1209,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the rotation of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param tilt
 	 * @param pan
 	 * @param roll
@@ -1131,6 +1221,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the rotation of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param rotation
 	 */
 	public void setRotation(PVector rotation){
@@ -1141,6 +1232,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * Set the tilt rotation offset of the entity.
 	 * This is the rotation in the xy plain.
 	 * (For 3D games only)
+	 * 
 	 * @param tilt
 	 */
 	public void setRotationOffsetTilt(float tilt){
@@ -1151,6 +1243,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * Set the pan rotation offset of the entity.
 	 * This is the rotation in the xz plain.
 	 * (For 3D games only)
+	 * 
 	 * @param pan
 	 */
 	public void setRotationOffsetPan(float pan){
@@ -1161,6 +1254,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * Set the roll rotation offset of the entity.
 	 * This is the rotation in the yz plain.
 	 * (For 3D games only)
+	 * 
 	 * @param roll
 	 */
 	public void setRotationOffsetRoll(float roll){
@@ -1170,6 +1264,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the rotation offset of the entity.
 	 * (For 2D games only)
+	 * 
 	 * @param rotation
 	 */
 	public void setRotationOffset(float rotation){
@@ -1179,6 +1274,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the rotation offset of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param tilt
 	 * @param pan
 	 * @param roll
@@ -1190,6 +1286,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the rotation offset of the entity.
 	 * (For 3D games only)
+	 * 
 	 * @param rotation
 	 */
 	public void setRotationOffset(PVector rotation){
@@ -1198,6 +1295,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the scale of the entity uniformly to the given value
+	 * 
 	 * @param s The new scale of the entity
 	 */
 	public void setScale(float s){
@@ -1206,6 +1304,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the scale of the entity.
+	 * 
 	 * @param x The x scale of the entity
 	 * @param y The y scale of the entity
 	 */
@@ -1215,6 +1314,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the scale of the entity.
+	 * 
 	 * @param x The x scale of the entity
 	 * @param y The y scale of the entity
 	 * @param z The z scale of the entity
@@ -1225,6 +1325,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the scale offset of the entity uniformly to the given value
+	 * 
 	 * @param s The new scale offset of the entity
 	 */
 	public void setScaleOffset(float s){
@@ -1233,6 +1334,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the scale offset of the entity.
+	 * 
 	 * @param x The x scale offset of the entity
 	 * @param y The y scale offset of the entity
 	 */
@@ -1242,6 +1344,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set the scale offset of the entity.
+	 * 
 	 * @param x The x scale offset of the entity
 	 * @param y The y scale offset of the entity
 	 * @param z The z scale offset of the entity
@@ -1253,6 +1356,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the mass of the entity.
 	 * The mass must be greater than 0.
+	 * 
 	 * @param mass The mass
 	 */
 	public void setMass(float mass) {
@@ -1262,6 +1366,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Set whether or not this entity is effected by gravity.
+	 * 
 	 * @param b
 	 */
 	public void setGravityEffected(boolean b){
@@ -1271,6 +1376,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Set the collision group that this entity is apart of.
 	 * The group number cannot be negative. If group value equals 0 then the entity will not collide with any thing.
+	 * 
 	 * @param group The group to put this entity in
 	 */
 	public void setCollisionGroup(int group){
@@ -1287,6 +1393,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * <li><strong>EQUAL_TO</strong>: will only collide with entities in the same collision group</li>
 	 * <li><strong>LESS_THAN</strong>: will only collide with entities in a lower collision group</li>
 	 * </ul>
+	 * 
 	 * @param mode The collision mode to use
 	 */
 	public void setCollisionMode(CollisionMode mode){
@@ -1300,6 +1407,7 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * See {@link #setCollisionGroup(int)} and {@link #setCollisionMode(CollisionMode)} for details.
+	 * 
 	 * @param group The group to put this entity in
 	 * @param mode The collision mode to use
 	 * @see setCollisionGroup(int)
@@ -1333,6 +1441,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the location this entity can be in.
 	 * This entity will not be at location in any dimension less than the give values.
+	 * 
 	 * @param minX The minimum x location this entity can be
 	 * @param minY The minimum y location this entity can be
 	 */
@@ -1343,6 +1452,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the location this entity can be in.
 	 * This entity will not be at location in any dimension less than the give values.
+	 * 
 	 * @param minX The minimum x location this entity can be
 	 * @param minY The minimum y location this entity can be
 	 * @param minZ The minimum z location this entity can be
@@ -1354,6 +1464,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the location this entity can be in.
 	 * This entity will not be at location in any dimension less than the give values.
+	 * 
 	 * @param min The minimum location this entity can be
 	 */
 	public void limitLocationMin(PVector min){
@@ -1372,6 +1483,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the location this entity can be in.
 	 * This entity will not be at location in any dimension greater than the give values.
+	 * 
 	 * @param maxX The minimum x location this entity can be
 	 * @param maxY The minimum y location this entity can be
 	 */
@@ -1382,6 +1494,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the location this entity can be in.
 	 * This entity will not be at location in any dimension greater than the give values.
+	 * 
 	 * @param maxX The minimum x location this entity can be
 	 * @param maxY The minimum y location this entity can be
 	 * @param maxZ The minimum z location this entity can be
@@ -1393,6 +1506,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the location this entity can be in.
 	 * This entity will not be at location in any dimension greater than the give values.
+	 * 
 	 * @param max The minimum location this entity can be
 	 */
 	public void limitLocationMax(PVector max){
@@ -1411,6 +1525,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the velocity of this entity.
 	 * This entity will not go slower than the given velocity.
+	 * 
 	 * @param minX The minimum x velocity of this entity
 	 * @param minY The minimum y velocity of this entity
 	 */
@@ -1421,6 +1536,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the velocity of this entity.
 	 * This entity will not go slower than the given velocity.
+	 * 
 	 * @param minX The minimum x velocity of this entity
 	 * @param minY The minimum y velocity of this entity
 	 * @param minZ The minimum z velocity of this entity
@@ -1432,6 +1548,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the velocity of this entity.
 	 * This entity will not go slower than the given velocity.
+	 * 
 	 * @param min The minimum velocity of this entity
 	 */
 	public void limitVelocityMin(PVector min){
@@ -1450,6 +1567,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the velocity of this entity.
 	 * This entity will not go faster than the given velocity.
+	 * 
 	 * @param maxX The minimum x velocity of this entity
 	 * @param maxY The minimum y velocity of this entity
 	 */
@@ -1460,6 +1578,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the velocity of this entity.
 	 * This entity will not go faster than the given velocity.
+	 * 
 	 * @param maxX The maximum x velocity of this entity
 	 * @param maxY The maximum y velocity of this entity
 	 * @param maxZ The maximum z velocity of this entity
@@ -1471,6 +1590,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the velocity of this entity.
 	 * This entity will not go faster than the given velocity.
+	 * 
 	 * @param max The maximum velocity of this entity
 	 */
 	public void limitVelocityMax(PVector max){
@@ -1493,6 +1613,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the rotation of this entity.
 	 * This entity will not have a rotation less than the give value.
+	 * 
 	 * @param ang The minimum angle that this entity can be at
 	 */
 	public void limitRotationMin(float ang){
@@ -1502,6 +1623,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the rotation of this entity.
 	 * This entity will not have a rotation less than any of the give values.
+	 * 
 	 * @param minTilt The minimum tilt angle that this entity can be at
 	 * @param minPan The minimum pan angle that this entity can be at
 	 * @param minRoll The minimum roll angle that this entity can be at
@@ -1513,6 +1635,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the rotation of this entity.
 	 * This entity will not have a rotation less than any of the give values.
+	 * 
 	 * @param min The minimum angles that this entity can be at
 	 */
 	public void limitRotationMin(PVector min){
@@ -1531,6 +1654,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the rotation of this entity.
 	 * This entity will not have a rotation greater than the give value.
+	 * 
 	 * @param ang The maximum angle that this entity can be at
 	 */
 	public void limitRotationMax(float ang){
@@ -1540,6 +1664,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the rotation of this entity.
 	 * This entity will not have a rotation greater than any of the give values.
+	 * 
 	 * @param maxTilt The maximum tilt angle that this entity can be at
 	 * @param maxPan The maximum pan angle that this entity can be at
 	 * @param maxRoll The maximum roll angle that this entity can be at
@@ -1551,6 +1676,7 @@ public abstract class Entity implements Updatable, Drawable {
 	/**
 	 * Limit the rotation of this entity.
 	 * This entity will not have a rotation greater than any of the give values.
+	 * 
 	 * @param max The maximum angles that this entity can be at
 	 */
 	public void limitRotationMax(PVector max){
