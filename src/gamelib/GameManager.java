@@ -3,6 +3,7 @@ package gamelib;
 import gamelib.scenes.GameScene;
 import gamelib.scenes.Scene;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 
 public final class GameManager {
@@ -17,6 +18,8 @@ public final class GameManager {
 	private Background background;
 
 	private boolean autoDraw = true;
+	
+	private boolean drawFPS = false;
 
 	public GameManager(PApplet sketch){
 		if(me != null){
@@ -60,7 +63,29 @@ public final class GameManager {
 			this.background.draw(g);
 			this.activeScene.draw(g);
 		}
+		if (drawFPS) {
+			drawFPS(g);
+		}
 		g.popStyle();
+	}
+	
+	/**
+	 * Draw the frame per second count in the top right corner.
+	 * 
+	 * @param g
+	 */
+	private void drawFPS(PGraphics g) {
+		if (sketch.frameRate < 30) {
+			g.fill(255, 0, 0);
+		} else if (sketch.frameRate < 45) {
+			g.fill(255, 255, 0);
+		} else {
+			g.fill(0, 255, 0);
+		}
+		
+		g.textAlign(PConstants.RIGHT, PConstants.TOP);
+		g.textSize(24);
+		g.text(sketch.frameRate, sketch.width - 10, 10);
 	}
 	
 	public PApplet getSketch(){
@@ -77,6 +102,15 @@ public final class GameManager {
 		}
 		this.activeScene = scene;
 		this.activeScene.enter();
+	}
+
+	/**
+	 * Set to true to draw the Frames per Second count in the top right corner;
+	 * 
+	 * @param drawFPS
+	 */
+	public void setDrawFPS(boolean drawFPS) {
+		this.drawFPS = drawFPS;
 	}
 
 	/**
