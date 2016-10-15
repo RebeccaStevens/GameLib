@@ -185,4 +185,22 @@ public class BoundingBox2D extends BoundingBox {
 	public void setDimensions(PVector location, PVector size) {
 		this.box = new Rectangle2D.Float(location.x - size.x / 2, location.y - size.y / 2, size.x, size.y);
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getName() + " " + getBox();
+	}
+	
+	public String getBox() {
+		return "(" + this.box.getX() + ", "  + this.box.getY() + ", "  + this.box.getWidth() + ", "  + this.box.getHeight() + ")";
+	}
+	
+	public String getBoxInPixels() {
+		Level level = entity.getLevel();
+		return "(" + 
+				level.convertGridUnitsXToPixels((float) this.box.getX()) + ", "  + 
+				level.convertGridUnitsYToPixels((float) this.box.getY()) + ", "  + 
+				level.convertGridUnitsWidthToPixels((float) this.box.getWidth()) + ", "  + 
+				level.convertGridUnitsHeightToPixels((float) this.box.getHeight()) + ")";
+	}
 }
