@@ -18,14 +18,35 @@ public final class GameManager {
 	private boolean autoDraw = true;
 	
 	private boolean drawFPS = false;
+	
+	/**
+	 * Create a Game Manager.
+	 * The game will have an uncapped frame rate.
+	 * 
+	 * @param sketch
+	 */
+	public GameManager(PApplet sketch) {
+		this(sketch, true);
+	}
 
-	public GameManager(PApplet sketch){
+	/**
+	 * Create a Game Manager.
+	 * 
+	 * @param sketch
+	 * @param uncappedFrameRate Whether or not the game's frame rate should be uncapped.
+	 */
+	public GameManager(PApplet sketch, boolean uncappedFrameRate) {
 		if(me != null){
-			throw new RuntimeException("Error: there can only be one LibraryManager.");
+			throw new RuntimeException("Error: there can only be one GameManager per sketch.");
 		}
 		
 		this.sketch = sketch;
 		GameManager.me = this;
+		
+		if (uncappedFrameRate) {
+			sketch.frameRate(-1);
+		}
+		
 		this.time = new Time();
 		this.gameScene = new GameScene();
 		setActiveScene(this.gameScene);
