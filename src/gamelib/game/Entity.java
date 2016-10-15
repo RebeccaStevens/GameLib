@@ -852,6 +852,33 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
+	 * Get the x velocity offset of this entity.
+	 * 
+	 * @return the x velocity
+	 */
+	public float getVelocityXOffset(){
+		return velocityOffset.x;
+	}
+
+	/**
+	 * Get the y velocity offset of this entity.
+	 * 
+	 * @return the y velocity
+	 */
+	public float getVelocityYOffset(){
+		return velocityOffset.y;
+	}
+
+	/**
+	 * Get the z velocity offset of this entity.
+	 * 
+	 * @return the z velocity
+	 */
+	public float getVelocityZOffset(){
+		return velocityOffset.z;
+	}
+
+	/**
 	 * Get the velocity offset of this entity.
 	 * 
 	 * @return the velocity offset
@@ -906,7 +933,34 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 	
 	/**
-	 * Get the rotation of this entity.
+	 * Get the tilt rotation offset of this entity.
+	 * 
+	 * @return the tilt rotation
+	 */
+	public float getRotationTiltOffset(){
+		return rotationOffset.x;
+	}
+
+	/**
+	 * Get the pan rotation offset of this entity.
+	 * 
+	 * @return the pan rotation
+	 */
+	public float getRotationPanOffset(){
+		return rotationOffset.y;
+	}
+
+	/**
+	 * Get the roll rotation offset of this entity.
+	 * 
+	 * @return the roll rotation
+	 */
+	public float getRotationRollOffset(){
+		return rotationOffset.z;
+	}
+	
+	/**
+	 * Get the rotation offset of this entity.
 	 * 
 	 * @return the rotation
 	 */
@@ -915,7 +969,7 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 	
 	/**
-	 * Get the rotation of this entity (tilt, pan, roll).
+	 * Get the rotation offset of this entity (tilt, pan, roll).
 	 * 
 	 * @return the rotation
 	 */
@@ -958,9 +1012,36 @@ public abstract class Entity implements Updatable, Drawable {
 	public PVector getScale(){
 		return scale.copy();
 	}
+
+	/**
+	 * Get the x scale offset of this entity.
+	 * 
+	 * @return The x scale
+	 */
+	public float getScaleXOffset(){
+		return scaleOffset.x;
+	}
+
+	/**
+	 * Get the x scale offset of this entity.
+	 * 
+	 * @return The x scale
+	 */
+	public float getScaleYOffset(){
+		return scaleOffset.y;
+	}
 	
 	/**
-	 * Get the scale of this entity.
+	 * Get the z scale offset of this entity.
+	 * 
+	 * @return The z scale
+	 */
+	public float getScaleZOffset(){
+		return scaleOffset.z;
+	}
+	
+	/**
+	 * Get the scale offset of this entity.
 	 * 
 	 * @return The scale
 	 */
