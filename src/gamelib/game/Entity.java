@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import gamelib.Drawable;
-import gamelib.GameManager;
 import gamelib.Updatable;
 import gamelib.game.entities.PushableEntity;
 import processing.core.PConstants;
@@ -888,33 +887,6 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 
 	/**
-	 * Get the tilt rotation of this entity.
-	 * 
-	 * @return the tilt rotation
-	 */
-	public float getRotationTilt(){
-		return rotation.x;
-	}
-
-	/**
-	 * Get the pan rotation of this entity.
-	 * 
-	 * @return the pan rotation
-	 */
-	public float getRotationPan(){
-		return rotation.y;
-	}
-
-	/**
-	 * Get the roll rotation of this entity.
-	 * 
-	 * @return the roll rotation
-	 */
-	public float getRotationRoll(){
-		return rotation.z;
-	}
-	
-	/**
 	 * Get the rotation of this entity.
 	 * 
 	 * @return the rotation
@@ -922,7 +894,16 @@ public abstract class Entity implements Updatable, Drawable {
 	public float getRotation2D(){
 		return rotation.x;
 	}
-	
+
+	/**
+	 * Get the rotation offset of this entity.
+	 * 
+	 * @return the rotation
+	 */
+	public float getRotation2DOffset(){
+		return rotationOffset.x;
+	}
+
 	/**
 	 * Get the rotation of this entity (tilt, pan, roll).
 	 * 
@@ -931,13 +912,49 @@ public abstract class Entity implements Updatable, Drawable {
 	public PVector getRotation3D(){
 		return rotation.copy();
 	}
+
+	/**
+	 * Get the tilt rotation of this entity.
+	 * 
+	 * @return the tilt rotation
+	 */
+	public float getRotation3DTilt(){
+		return rotation.x;
+	}
+
+	/**
+	 * Get the pan rotation of this entity.
+	 * 
+	 * @return the pan rotation
+	 */
+	public float getRotation3DPan(){
+		return rotation.y;
+	}
+
+	/**
+	 * Get the roll rotation of this entity.
+	 * 
+	 * @return the roll rotation
+	 */
+	public float getRotation3DRoll(){
+		return rotation.z;
+	}
 	
+	/**
+	 * Get the rotation offset of this entity (tilt, pan, roll).
+	 * 
+	 * @return the rotation
+	 */
+	public PVector getRotation3DOffset(){
+		return rotationOffset.copy();
+	}
+
 	/**
 	 * Get the tilt rotation offset of this entity.
 	 * 
 	 * @return the tilt rotation
 	 */
-	public float getRotationTiltOffset(){
+	public float getRotation3DTiltOffset(){
 		return rotationOffset.x;
 	}
 
@@ -946,7 +963,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @return the pan rotation
 	 */
-	public float getRotationPanOffset(){
+	public float getRotation3DPanOffset(){
 		return rotationOffset.y;
 	}
 
@@ -955,28 +972,10 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @return the roll rotation
 	 */
-	public float getRotationRollOffset(){
+	public float getRotation3DRollOffset(){
 		return rotationOffset.z;
 	}
 	
-	/**
-	 * Get the rotation offset of this entity.
-	 * 
-	 * @return the rotation
-	 */
-	public float getRotationOffset2D(){
-		return rotationOffset.x;
-	}
-	
-	/**
-	 * Get the rotation offset of this entity (tilt, pan, roll).
-	 * 
-	 * @return the rotation
-	 */
-	public PVector getRotationOffset3D(){
-		return rotationOffset.copy();
-	}
-
 	/**
 	 * Get the x scale of this entity.
 	 * 
@@ -1127,6 +1126,91 @@ public abstract class Entity implements Updatable, Drawable {
 	 */
 	public boolean isOnGround() {
 		return ground != null;
+	}
+
+	public void ignoreInCollisions(Entity entity){
+		collisionIgnore.add(entity);
+	}
+
+	public void unignoreInCollisions(Entity entity){
+		collisionIgnore.remove(entity);
+	}
+
+	/**
+	 * Set the mass of the entity.
+	 * The mass must be greater than 0.
+	 * 
+	 * @param mass The mass
+	 */
+	public void setMass(float mass) {
+		if(mass<=0) throw new RuntimeException("Can not set mass to zero or a negitive value.");
+		this.mass = mass;
+	}
+
+	/**
+	 * Set whether or not this entity is effected by gravity.
+	 * 
+	 * @param b
+	 */
+	public void setGravityEffected(boolean b){
+		gravityEffected = b;
+	}
+
+	/**
+	 * Set the collision group that this entity is apart of.
+	 * The group number cannot be negative. If group value equals 0 then the entity will not collide with any thing.
+	 * 
+	 * @param group The group to put this entity in
+	 */
+	public void setCollisionGroup(int group){
+		if(group < 0) throw new RuntimeException("Cannot set an entity's collision group to a negative namuber.");
+		collisionGroup = group;
+	}
+
+	/**
+	 * Set the collision mode that this entity uses.
+	 * Modes:
+	 * <ul>
+	 * <li><strong>null</strong>: do not collide with anything</li>
+	 * <li><strong>GREATER_THAN_OR_EQUAL_TO</strong>: will only collide with entities in the same or a higher collision group</li>
+	 * <li><strong>EQUAL_TO</strong>: will only collide with entities in the same collision group</li>
+	 * <li><strong>LESS_THAN</strong>: will only collide with entities in a lower collision group</li>
+	 * </ul>
+	 * 
+	 * @param mode The collision mode to use
+	 */
+	public void setCollisionMode(CollisionMode mode){
+		if(mode == null){
+			setCollisionGroup(0);
+		}
+		else{
+			collisionMode = mode;
+		}
+	}
+
+	/**
+	 * See {@link #setCollisionGroup(int)} and {@link #setCollisionMode(CollisionMode)} for details.
+	 * 
+	 * @param group The group to put this entity in
+	 * @param mode The collision mode to use
+	 * @see setCollisionGroup(int)
+	 * @see setCollisionMode(CollisionMode)
+	 */
+	public void setCollisionMode(int group, CollisionMode mode){
+		setCollisionGroup(group);
+		setCollisionMode(mode);
+	}
+
+	public void setBoundingBox3D(BoundingBox3D boundingBox) {
+		if(boundingBox == null) throw new IllegalArgumentException("Cannot set an entity's bounding box to null.");
+		if(!level.is3D()) throw new UnsupportedOperationException("Cannot use a 3D bounding box in a 2D level.");
+		this.boundingBox = boundingBox;
+	}
+
+	public void setBoundingBox2D(BoundingBox2D boundingBox) {
+		if(boundingBox == null) throw new IllegalArgumentException("Cannot set an entity's bounding box to null.");
+		if(level.is3D()) throw new UnsupportedOperationException("Cannot use a 2D bounding box in a 3D level.");
+		this.boundingBox = boundingBox;
 	}
 
 	/**
@@ -1370,13 +1454,33 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 	
 	/**
+	 * Set the rotation of the entity.
+	 * (For 2D games only)
+	 * 
+	 * @param rotation
+	 */
+	public void setRotation2D(float rotation){
+		this.rotation.x = rotation;
+	}
+
+	/**
+	 * Set the rotation offset of the entity.
+	 * (For 2D games only)
+	 * 
+	 * @param rotation
+	 */
+	public void setRotation2DOffset(float rotation){
+		this.rotationOffset.x = rotation;
+	}
+
+	/**
 	 * Set the tilt rotation of the entity.
 	 * This is the rotation in the xy plain.
 	 * (For 3D games only)
 	 * 
 	 * @param tilt
 	 */
-	public void setRotationTilt(float tilt){
+	public void setRotation3DTilt(float tilt){
 		rotation.x = tilt;
 	}
 
@@ -1387,7 +1491,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @param pan
 	 */
-	public void setRotationPan(float pan){
+	public void setRotation3DPan(float pan){
 		rotation.y = pan;
 	}
 	
@@ -1398,18 +1502,8 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @param roll
 	 */
-	public void setRotationRoll(float roll){
+	public void setRotation3DRoll(float roll){
 		rotation.z = roll;
-	}
-	
-	/**
-	 * Set the rotation of the entity.
-	 * (For 2D games only)
-	 * 
-	 * @param rotation
-	 */
-	public void setRotation(float rotation){
-		this.rotation.x = rotation;
 	}
 	
 	/**
@@ -1420,7 +1514,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param pan
 	 * @param roll
 	 */
-	public void setRotation(float tilt, float pan, float roll){
+	public void setRotation3D(float tilt, float pan, float roll){
 		rotation.set(tilt, pan, roll);
 	}
 	
@@ -1430,7 +1524,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @param rotation
 	 */
-	public void setRotation(PVector rotation){
+	public void setRotation3D(PVector rotation){
 		this.rotation.set(rotation);
 	}
 	
@@ -1441,7 +1535,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @param tilt
 	 */
-	public void setRotationOffsetTilt(float tilt){
+	public void setRotation3DOffsetTilt(float tilt){
 		rotationOffset.x = tilt;
 	}
 
@@ -1452,7 +1546,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @param pan
 	 */
-	public void setRotationOffsetPan(float pan){
+	public void setRotation3DOffsetPan(float pan){
 		rotationOffset.y = pan;
 	}
 	
@@ -1463,18 +1557,8 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @param roll
 	 */
-	public void setRotationOffsetRoll(float roll){
+	public void setRotation3DOffsetRoll(float roll){
 		rotationOffset.z = roll;
-	}
-	
-	/**
-	 * Set the rotation offset of the entity.
-	 * (For 2D games only)
-	 * 
-	 * @param rotation
-	 */
-	public void setRotationOffset(float rotation){
-		this.rotationOffset.x = rotation;
 	}
 	
 	/**
@@ -1485,7 +1569,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * @param pan
 	 * @param roll
 	 */
-	public void setRotationOffset(float tilt, float pan, float roll){
+	public void setRotation3DOffset(float tilt, float pan, float roll){
 		rotationOffset.set(tilt, pan, roll);
 	}
 	
@@ -1495,7 +1579,7 @@ public abstract class Entity implements Updatable, Drawable {
 	 * 
 	 * @param rotation
 	 */
-	public void setRotationOffset(PVector rotation){
+	public void setRotation3DOffset(PVector rotation){
 		this.rotationOffset.set(rotation);
 	}
 	
@@ -1560,256 +1644,111 @@ public abstract class Entity implements Updatable, Drawable {
 	}
 	
 	/**
-	 * Set the mass of the entity.
-	 * The mass must be greater than 0.
-	 * 
-	 * @param mass The mass
-	 */
-	public void setMass(float mass) {
-		if(mass<=0) throw new RuntimeException("Can not set mass to zero or a negitive value.");
-		this.mass = mass;
-	}
-	
-	/**
-	 * Set whether or not this entity is effected by gravity.
-	 * 
-	 * @param b
-	 */
-	public void setGravityEffected(boolean b){
-		gravityEffected = b;
-	}
-	
-	/**
-	 * Set the collision group that this entity is apart of.
-	 * The group number cannot be negative. If group value equals 0 then the entity will not collide with any thing.
-	 * 
-	 * @param group The group to put this entity in
-	 */
-	public void setCollisionGroup(int group){
-		if(group < 0) throw new RuntimeException("Cannot set an entity's collision group to a negative namuber.");
-		collisionGroup = group;
-	}
-	
-	/**
-	 * Set the collision mode that this entity uses.
-	 * Modes:
-	 * <ul>
-	 * <li><strong>null</strong>: do not collide with anything</li>
-	 * <li><strong>GREATER_THAN_OR_EQUAL_TO</strong>: will only collide with entities in the same or a higher collision group</li>
-	 * <li><strong>EQUAL_TO</strong>: will only collide with entities in the same collision group</li>
-	 * <li><strong>LESS_THAN</strong>: will only collide with entities in a lower collision group</li>
-	 * </ul>
-	 * 
-	 * @param mode The collision mode to use
-	 */
-	public void setCollisionMode(CollisionMode mode){
-		if(mode == null){
-			setCollisionGroup(0);
-		}
-		else{
-			collisionMode = mode;
-		}
-	}
-	
-	/**
-	 * See {@link #setCollisionGroup(int)} and {@link #setCollisionMode(CollisionMode)} for details.
-	 * 
-	 * @param group The group to put this entity in
-	 * @param mode The collision mode to use
-	 * @see setCollisionGroup(int)
-	 * @see setCollisionMode(CollisionMode)
-	 */
-	public void setCollisionMode(int group, CollisionMode mode){
-		setCollisionGroup(group);
-		setCollisionMode(mode);
-	}
-	
-	public void setBoundingBox3D(BoundingBox3D boundingBox) {
-		if(boundingBox == null) throw new IllegalArgumentException("Cannot set an entity's bounding box to null.");
-		if(!level.is3D()) throw new UnsupportedOperationException("Cannot use a 3D bounding box in a 2D level.");
-		this.boundingBox = boundingBox;
-	}
-	
-	public void setBoundingBox2D(BoundingBox2D boundingBox) {
-		if(boundingBox == null) throw new IllegalArgumentException("Cannot set an entity's bounding box to null.");
-		if(level.is3D()) throw new UnsupportedOperationException("Cannot use a 2D bounding box in a 3D level.");
-		this.boundingBox = boundingBox;
-	}
-	
-	public void ignoreInCollisions(Entity entity){
-		collisionIgnore.add(entity);
-	}
-	
-	public void unignoreInCollisions(Entity entity){
-		collisionIgnore.remove(entity);
-	}
-	
-	/**
-	 * Limit the location this entity can be in.
-	 * This entity will not be at location in any dimension less than the give values.
+	 * Limit the min x location this entity can be in.
 	 * 
 	 * @param minX The minimum x location this entity can be
-	 * @param minY The minimum y location this entity can be
 	 */
-	public void limitLocationMin(float minX, float minY){
-		limitLocationMin(new PVector(minX, minY));
+	public void limitLocationXMin(float minX) {
+		minLocation.x = minX;
 	}
 	
 	/**
-	 * Limit the location this entity can be in.
-	 * This entity will not be at location in any dimension less than the give values.
+	 * Limit the min y location this entity can be in.
 	 * 
-	 * @param minX The minimum x location this entity can be
-	 * @param minY The minimum y location this entity can be
-	 * @param minZ The minimum z location this entity can be
+	 * @param minX The minimum y location this entity can be
 	 */
-	public void limitLocationMin(float minX, float minY, float minZ){
-		limitLocationMin(new PVector(minX, minY, minZ));
+	public void limitLocationYMin(float minY) {
+		minLocation.y = minY;
 	}
 	
 	/**
-	 * Limit the location this entity can be in.
-	 * This entity will not be at location in any dimension less than the give values.
+	 * Limit the min z location this entity can be in.
 	 * 
-	 * @param min The minimum location this entity can be
+	 * @param minX The minimum z location this entity can be
 	 */
-	public void limitLocationMin(PVector min){
-		if(min == null){
-			minLocation = null;
-			return;
-		}
-		if(minLocation == null){
-			minLocation = min.copy();
-		}
-		else{
-			minLocation.set(min);
-		}
+	public void limitLocationZMin(float minZ) {
+		minLocation.z = minZ;
+	}
+
+	/**
+	 * Limit the max x location this entity can be in.
+	 * 
+	 * @param maxX The maximum x location this entity can be
+	 */
+	public void limitLocationXMax(float maxX) {
+		maxLocation.x = maxX;
 	}
 	
 	/**
-	 * Limit the location this entity can be in.
-	 * This entity will not be at location in any dimension greater than the give values.
+	 * Limit the max y location this entity can be in.
 	 * 
-	 * @param maxX The minimum x location this entity can be
-	 * @param maxY The minimum y location this entity can be
+	 * @param maxY The maximum y location this entity can be
 	 */
-	public void limitLocationMax(float maxX, float maxY){
-		limitLocationMax(new PVector(maxX, maxY));
+	public void limitLocationYMax(float maxY) {
+		maxLocation.y = maxY;
 	}
 	
 	/**
-	 * Limit the location this entity can be in.
-	 * This entity will not be at location in any dimension greater than the give values.
+	 * Limit the max z location this entity can be in.
 	 * 
-	 * @param maxX The minimum x location this entity can be
-	 * @param maxY The minimum y location this entity can be
-	 * @param maxZ The minimum z location this entity can be
+	 * @param maxZ The maximum z location this entity can be
 	 */
-	public void limitLocationMax(float maxX, float maxY, float maxZ){
-		limitLocationMax(new PVector(maxX, maxY, maxZ));
+	public void limitLocationZMax(float maxZ) {
+		maxLocation.z = maxZ;
 	}
 	
 	/**
-	 * Limit the location this entity can be in.
-	 * This entity will not be at location in any dimension greater than the give values.
+	 * Limit the min x velocity of this entity.
 	 * 
-	 * @param max The minimum location this entity can be
+	 * @param minX The minimum x velocity this entity can be
 	 */
-	public void limitLocationMax(PVector max){
-		if(max == null){
-			maxLocation = null;
-			return;
-		}
-		if(maxLocation == null){
-			maxLocation = max.copy();
-		}
-		else{
-			maxLocation.set(max);
-		}
+	public void limitVelocityXMin(float minX) {
+		minVelocity.x = minX;
 	}
 	
 	/**
-	 * Limit the velocity of this entity.
-	 * This entity will not go slower than the given velocity.
+	 * Limit the min y velocity of this entity.
 	 * 
-	 * @param minX The minimum x velocity of this entity
-	 * @param minY The minimum y velocity of this entity
+	 * @param minY The minimum y velocity this entity can be
 	 */
-	public void limitVelocityMin(float minX, float minY){
-		limitVelocityMin(new PVector(minX, minY));
+	public void limitVelocityYMin(float minY) {
+		minVelocity.y = minY;
 	}
 	
 	/**
-	 * Limit the velocity of this entity.
-	 * This entity will not go slower than the given velocity.
+	 * Limit the min z velocity of this entity.
 	 * 
-	 * @param minX The minimum x velocity of this entity
-	 * @param minY The minimum y velocity of this entity
-	 * @param minZ The minimum z velocity of this entity
+	 * @param minZ The minimum z velocity this entity can be
 	 */
-	public void limitVelocityMin(float minX, float minY, float minZ){
-		limitVelocityMin(new PVector(minX, minY, minZ));
+	public void limitVelocityZMin(float minZ) {
+		minVelocity.z = minZ;
 	}
 	
 	/**
-	 * Limit the velocity of this entity.
-	 * This entity will not go slower than the given velocity.
+	 * Limit the max x velocity of this entity.
 	 * 
-	 * @param min The minimum velocity of this entity
+	 * @param maxX The maximum x velocity this entity can be
 	 */
-	public void limitVelocityMin(PVector min){
-		if(min == null){
-			minVelocity = null;
-			return;
-		}
-		if(minVelocity == null){
-			minVelocity = min.copy();
-		}
-		else{
-			minVelocity.set(min);
-		}
+	public void limitVelocityXMax(float maxX) {
+		maxVelocity.x = maxX;
 	}
 	
 	/**
-	 * Limit the velocity of this entity.
-	 * This entity will not go faster than the given velocity.
+	 * Limit the max y velocity of this entity.
 	 * 
-	 * @param maxX The minimum x velocity of this entity
-	 * @param maxY The minimum y velocity of this entity
+	 * @param maxY The maximum y velocity this entity can be
 	 */
-	public void limitVelocityMax(float maxX, float maxY){
-		limitVelocityMax(new PVector(maxX, maxY));
+	public void limitVelocityYMax(float maxY) {
+		maxVelocity.y = maxY;
 	}
 	
 	/**
-	 * Limit the velocity of this entity.
-	 * This entity will not go faster than the given velocity.
+	 * Limit the max z velocity of this entity.
 	 * 
-	 * @param maxX The maximum x velocity of this entity
-	 * @param maxY The maximum y velocity of this entity
-	 * @param maxZ The maximum z velocity of this entity
+	 * @param maxZ The maximum z velocity this entity can be
 	 */
-	public void limitVelocityMax(float maxX, float maxY, float maxZ){
-		limitVelocityMax(new PVector(maxX, maxY, maxZ));
-	}
-	
-	/**
-	 * Limit the velocity of this entity.
-	 * This entity will not go faster than the given velocity.
-	 * 
-	 * @param max The maximum velocity of this entity
-	 */
-	public void limitVelocityMax(PVector max){
-		if(max == null){
-			maxVelocity = null;
-			return;
-		}
-		if(maxVelocity == null){
-			maxVelocity = max.copy();
-		}
-		else{
-			maxVelocity.set(max);
-		}
+	public void limitVelocityZMax(float maxZ) {
+		maxVelocity.z = maxZ;
 	}
 	
 	public void limitVelocityHorizontal(float maxHorizontalVelocity){
@@ -1818,197 +1757,361 @@ public abstract class Entity implements Updatable, Drawable {
 	
 	/**
 	 * Limit the rotation of this entity.
-	 * This entity will not have a rotation less than the give value.
 	 * 
-	 * @param ang The minimum angle that this entity can be at
+	 * @param minAng The minimum angle that this entity can be at
 	 */
-	public void limitRotationMin(float ang){
-		limitRotationMin(new PVector(ang, 0, 0));
+	public void limitRotation2DMin(float minAng) {
+		this.minRotation.x = minAng;
 	}
 	
 	/**
 	 * Limit the rotation of this entity.
-	 * This entity will not have a rotation less than any of the give values.
 	 * 
-	 * @param minTilt The minimum tilt angle that this entity can be at
-	 * @param minPan The minimum pan angle that this entity can be at
-	 * @param minRoll The minimum roll angle that this entity can be at
+	 * @param maxAng The maximum angle that this entity can be at
 	 */
-	public void limitRotationMin(float minTilt, float minPan, float minRoll){
-		limitRotationMin(new PVector(minTilt, minPan, minRoll));
+	public void limitRotation2DMax(float maxAng){
+		this.maxRotation.x = maxAng;
 	}
 	
 	/**
 	 * Limit the rotation of this entity.
-	 * This entity will not have a rotation less than any of the give values.
 	 * 
-	 * @param min The minimum angles that this entity can be at
+	 * @param minTilt The minimum tilt that this entity can be at
 	 */
-	public void limitRotationMin(PVector min){
-		if(min == null){
-			minRotation = null;
-			return;
-		}
-		if(minRotation == null){
-			minRotation = min.copy();
-		}
-		else{
-			minRotation.set(min);
-		}
+	public void limitRotation3DTiltMin(float minTilt) {
+		minRotation.x = minTilt;
 	}
 	
 	/**
 	 * Limit the rotation of this entity.
-	 * This entity will not have a rotation greater than the give value.
 	 * 
-	 * @param ang The maximum angle that this entity can be at
+	 * @param minPan The minimum pan that this entity can be at
 	 */
-	public void limitRotationMax(float ang){
-		limitRotationMax(new PVector(ang, 0, 0));
+	public void limitRotation3DPanMin(float minPan) {
+		minRotation.y = minPan;
 	}
 	
 	/**
 	 * Limit the rotation of this entity.
-	 * This entity will not have a rotation greater than any of the give values.
 	 * 
-	 * @param maxTilt The maximum tilt angle that this entity can be at
-	 * @param maxPan The maximum pan angle that this entity can be at
-	 * @param maxRoll The maximum roll angle that this entity can be at
+	 * @param minRoll The minimum roll that this entity can be at
 	 */
-	public void limitRotationMax(float maxTilt, float maxPan, float maxRoll){
-		limitRotationMax(new PVector(maxTilt, maxPan, maxRoll));
+	public void limitRotation3DRollMin(float minRoll) {
+		minRotation.z = minRoll;
 	}
 	
 	/**
 	 * Limit the rotation of this entity.
-	 * This entity will not have a rotation greater than any of the give values.
 	 * 
-	 * @param max The maximum angles that this entity can be at
+	 * @param maxTilt The maximum tilt that this entity can be at
 	 */
-	public void limitRotationMax(PVector max){
-		if(max == null){
-			maxRotation = null;
-			return;
-		}
-		if(maxRotation == null){
-			maxRotation = max.copy();
-		}
-		else{
-			maxRotation.set(max);
-		}
+	public void limitRotation3DTiltMax(float maxTilt) {
+		maxRotation.x = maxTilt;
 	}
 	
 	/**
-	 * Remove the minimum limits applied to the location of this entity.
+	 * Limit the rotation of this entity.
+	 * 
+	 * @param maxPan The maximum pan that this entity can be at
 	 */
-	public void removeLimitLocationMin(){
-		limitLocationMin(null);
+	public void limitRotation3DPanMax(float maxPan) {
+		maxRotation.y = maxPan;
 	}
-
+	
 	/**
-	 * Remove the maximum limits applied to the location of this entity.
+	 * Limit the rotation of this entity.
+	 * 
+	 * @param maxRoll The maximum roll that this entity can be at
 	 */
-	public void removeLimitLocationMax(){
-		limitLocationMax(null);
+	public void limitRotation3DRollMax(float maxRoll) {
+		maxRotation.z = maxRoll;
 	}
 
 	/**
 	 * Remove the limits applied to the location of this entity.
 	 */
 	public void removeLimitLocation(){
-		removeLimitLocationMin();
-		removeLimitLocationMax();
+		minLocation.set(Float.NaN, Float.NaN, Float.NaN);
+		maxLocation.set(Float.NaN, Float.NaN, Float.NaN);
 	}
-
+	
 	/**
-	 * Remove the minimum limits applied to this entity's velocity.
+	 * Remove the limits applied to the min x location of this entity.
 	 */
-	public void removeLimitVelocityMin(){
-		limitVelocityMin(null);
+	public void removeLimitLocationXMin(){
+		minLocation.x = Float.NaN;
 	}
-
+	
 	/**
-	 * Remove the maximum limits applied to this entity's velocity.
+	 * Remove the limits applied to the min y location of this entity.
 	 */
-	public void removeLimitVelocityMax(){
-		limitVelocityMax(null);
+	public void removeLimitLocationYMin(){
+		minLocation.y = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the min z location of this entity.
+	 */
+	public void removeLimitLocationZMin(){
+		minLocation.z = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the max x location of this entity.
+	 */
+	public void removeLimitLocationXMax(){
+		maxLocation.x = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the max y location of this entity.
+	 */
+	public void removeLimitLocationYMax(){
+		maxLocation.y = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the max z location of this entity.
+	 */
+	public void removeLimitLocationZMax(){
+		maxLocation.z = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the x location of this entity.
+	 */
+	public void removeLimitLocationX(){
+		removeLimitLocationXMin();
+		removeLimitLocationXMax();
+	}
+	
+	/**
+	 * Remove the limits applied to the y location of this entity.
+	 */
+	public void removeLimitLocationY(){
+		removeLimitLocationYMin();
+		removeLimitLocationYMax();
+	}
+	
+	/**
+	 * Remove the limits applied to the z location of this entity.
+	 */
+	public void removeLimitLocationZ(){
+		removeLimitLocationZMin();
+		removeLimitLocationZMax();
 	}
 
 	/**
 	 * Remove the limits applied to this entity's velocity.
 	 */
 	public void removeLimitVelocity(){
-		removeLimitVelocityMin();
-		removeLimitVelocityMax();
-		removeLimitVelocityHorizontal();
+		minVelocity.set(Float.NaN, Float.NaN, Float.NaN);
+		maxVelocity.set(Float.NaN, Float.NaN, Float.NaN);
+		maxHorizontalVelocity = Float.NaN;
 	}
 
+	/**
+	 * Remove the limits applied to this entity's min x velocity.
+	 */
+	public void removeLimitVelocityXMin(){
+		minVelocity.x =  Float.NaN;
+	}
+
+	/**
+	 * Remove the limits applied to this entity's min y velocity.
+	 */
+	public void removeLimitVelocityYMin(){
+		minVelocity.y =  Float.NaN;
+	}
+
+	/**
+	 * Remove the limits applied to this entity's min z velocity.
+	 */
+	public void removeLimitVelocityZMin(){
+		minVelocity.z =  Float.NaN;
+	}
+
+	/**
+	 * Remove the limits applied to this entity's max x velocity.
+	 */
+	public void removeLimitVelocityXMax(){
+		maxVelocity.x =  Float.NaN;
+	}
+
+	/**
+	 * Remove the limits applied to this entity's max y velocity.
+	 */
+	public void removeLimitVelocityYMax(){
+		maxVelocity.y =  Float.NaN;
+	}
+
+	/**
+	 * Remove the limits applied to this entity's max z velocity.
+	 */
+	public void removeLimitVelocityZMax(){
+		maxVelocity.z =  Float.NaN;
+	}
+
+	/**
+	 * Remove the limits applied to this entity's x velocity.
+	 */
+	public void removeLimitVelocityX(){
+		removeLimitVelocityXMin();
+		removeLimitVelocityXMax();
+	}
+
+	/**
+	 * Remove the limits applied to this entity's y velocity.
+	 */
+	public void removeLimitVelocityY(){
+		removeLimitVelocityYMin();
+		removeLimitVelocityYMax();
+	}
+
+	/**
+	 * Remove the limits applied to this entity's z velocity.
+	 */
+	public void removeLimitVelocityZ(){
+		removeLimitVelocityZMin();
+		removeLimitVelocityZMax();
+	}
+
+	/**
+	 * Remove the limits applied to this entity's horizontal velocity.
+	 */
 	public void removeLimitVelocityHorizontal(){
 		this.maxHorizontalVelocity = Float.NaN;
 	}
-
+	
 	/**
-	 * Remove the minimum limits applied to the rotation of this entity.
+	 * Remove the limits applied to the min rotation of this entity.
 	 */
-	public void removeLimitRotationMin(){
-		limitRotationMin(null);
+	public void removeLimitRotation2DMin(){
+		minRotation.x = Float.NaN;
 	}
-
+	
 	/**
-	 * Remove the maximum limits applied to the rotation of this entity.
+	 * Remove the limits applied to the max rotation of this entity.
 	 */
-	public void removeLimitRotationMax(){
-		limitRotationMax(null);
+	public void removeLimitRotation2DMax(){
+		maxRotation.x = Float.NaN;
 	}
 	
 	/**
 	 * Remove the limits applied to the rotation of this entity.
 	 */
-	public void removeLimitRotation(){
-		removeLimitRotationMin();
-		removeLimitRotationMax();
+	public void removeLimitRotation2D(){
+		removeLimitRotation2DMin();
+		removeLimitRotation2DMax();
+	}
+
+	/**
+	 * Remove the limits applied to the rotation of this entity.
+	 */
+	public void removeLimitRotation3D(){
+		minRotation.set(Float.NaN, Float.NaN, Float.NaN);
+		maxRotation.set(Float.NaN, Float.NaN, Float.NaN);
+	}
+	
+	/**
+	 * Remove the limits applied to the min tilt of this entity.
+	 */
+	public void removeLimitRotation3DTiltMin() {
+		minRotation.x = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the min pan of this entity.
+	 */
+	public void removeLimitRotation3DPanMin() {
+		minRotation.y = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the min roll of this entity.
+	 */
+	public void removeLimitRotation3DRollMin() {
+		minRotation.z = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the max tilt of this entity.
+	 */
+	public void removeLimitRotation3DTiltMax() {
+		maxRotation.x = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the max pan of this entity.
+	 */
+	public void removeLimitRotation3DPanMax() {
+		maxRotation.y = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the max roll of this entity.
+	 */
+	public void removeLimitRotation3DRollMax() {
+		maxRotation.z = Float.NaN;
+	}
+	
+	/**
+	 * Remove the limits applied to the tilt of this entity.
+	 */
+	public void removeLimitRotation3DTilt() {
+		removeLimitRotation3DTiltMin();
+		removeLimitRotation3DTiltMax();
+	}
+	
+	/**
+	 * Remove the limits applied to the pan of this entity.
+	 */
+	public void removeLimitRotation3DPan() {
+		removeLimitRotation3DPanMin();
+		removeLimitRotation3DPanMax();
+	}
+	
+	/**
+	 * Remove the limits applied to the roll of this entity.
+	 */
+	public void removeLimitRotation3DRoll() {
+		removeLimitRotation3DRollMin();
+		removeLimitRotation3DRollMax();
 	}
 	
 	/**
 	 * Apply the limits the location of this entity.
 	 */
 	private void applyLocationLimits(){
-		if(minLocation != null){
-			location.x = Math.max(location.x - locationOffset.x, minLocation.x);
-			location.y = Math.max(location.y - locationOffset.y, minLocation.y);
-			location.z = Math.max(location.z - locationOffset.z, minLocation.z);
-		}
-		if(maxLocation != null){
-			location.x = Math.min(location.x - locationOffset.x, maxLocation.x);
-			location.y = Math.min(location.y - locationOffset.y, maxLocation.y);
-			location.z = Math.min(location.z - locationOffset.z, maxLocation.z);
-		}
-		if(minRotation != null){
-			rotation.x = Math.max(rotation.x - rotationOffset.x, minRotation.x);
-			rotation.y = Math.max(rotation.y - rotationOffset.y, minRotation.y);
-			rotation.z = Math.max(rotation.z - rotationOffset.z, minRotation.z);
-		}
-		if(maxRotation != null){
-			rotation.x = Math.min(rotation.x - rotationOffset.x, maxRotation.x);
-			rotation.y = Math.min(rotation.y - rotationOffset.y, maxRotation.y);
-			rotation.z = Math.min(rotation.z - rotationOffset.z, maxRotation.z);
-		}
+		if (!Float.isNaN(minLocation.x)) location.x = Math.max(location.x - locationOffset.x, minLocation.x);
+		if (!Float.isNaN(minLocation.y)) location.y = Math.max(location.y - locationOffset.y, minLocation.y);
+		if (!Float.isNaN(minLocation.z)) location.z = Math.max(location.z - locationOffset.z, minLocation.z);
+
+		if (!Float.isNaN(maxLocation.x)) location.x = Math.min(location.x - locationOffset.x, maxLocation.x);
+		if (!Float.isNaN(maxLocation.y)) location.y = Math.min(location.y - locationOffset.y, maxLocation.y);
+		if (!Float.isNaN(maxLocation.z)) location.z = Math.min(location.z - locationOffset.z, maxLocation.z);
+
+		if (!Float.isNaN(minRotation.x)) rotation.x = Math.max(rotation.x - rotationOffset.x, minRotation.x);
+		if (!Float.isNaN(minRotation.y)) rotation.y = Math.max(rotation.y - rotationOffset.y, minRotation.y);
+		if (!Float.isNaN(minRotation.z)) rotation.z = Math.max(rotation.z - rotationOffset.z, minRotation.z);
+		
+		if (!Float.isNaN(maxRotation.x)) rotation.x = Math.min(rotation.x - rotationOffset.x, maxRotation.x);
+		if (!Float.isNaN(maxRotation.y)) rotation.y = Math.min(rotation.y - rotationOffset.y, maxRotation.y);
+		if (!Float.isNaN(maxRotation.z)) rotation.z = Math.min(rotation.z - rotationOffset.z, maxRotation.z);
 	}
 	
 	/**
 	 * Apply the limits the motion of this entity.
 	 */
 	private void applyMotionLimits() {
-		if(minVelocity != null){
-			velocity.x = Math.max(velocity.x - velocityOffset.x, minVelocity.x);
-			velocity.y = Math.max(velocity.y - velocityOffset.y, minVelocity.y);
-			velocity.z = Math.max(velocity.z - velocityOffset.z, minVelocity.z);
-		}
-		if(maxVelocity != null){
-			velocity.x = Math.min(velocity.x - velocityOffset.x, maxVelocity.x);
-			velocity.y = Math.min(velocity.y - velocityOffset.y, maxVelocity.y);
-			velocity.z = Math.min(velocity.z - velocityOffset.z, maxVelocity.z);
-		}
+		if (!Float.isNaN(maxRotation.x)) velocity.x = Math.max(velocity.x - velocityOffset.x, minVelocity.x);
+		if (!Float.isNaN(minVelocity.y)) velocity.y = Math.max(velocity.y - velocityOffset.y, minVelocity.y);
+		if (!Float.isNaN(minVelocity.z)) velocity.z = Math.max(velocity.z - velocityOffset.z, minVelocity.z);
+
+		if (!Float.isNaN(maxVelocity.x)) velocity.x = Math.min(velocity.x - velocityOffset.x, maxVelocity.x);
+		if (!Float.isNaN(maxVelocity.y)) velocity.y = Math.min(velocity.y - velocityOffset.y, maxVelocity.y);
+		if (!Float.isNaN(maxVelocity.z)) velocity.z = Math.min(velocity.z - velocityOffset.z, maxVelocity.z);
+
 		if(!Float.isNaN(maxHorizontalVelocity)){
 			PVector temp = velocity.copy();
 			temp.x += this.velocityOffset.x;
