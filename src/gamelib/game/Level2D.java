@@ -14,8 +14,8 @@ public abstract class Level2D extends Level {
 		entityLayer = new HashMap<Entity, Float>();
 	}
 
-	public void addEntity(Entity ent, float layer){
-		super.addEntity(ent);
+	public void addGameObject(Entity ent, float layer){
+		super.addGameObject(ent);
 		entityLayer.put(ent, layer);
 		entitiesNeedResorting = true;
 	}

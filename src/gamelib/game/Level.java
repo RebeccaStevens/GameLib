@@ -14,8 +14,9 @@ import processing.core.PVector;
 
 public abstract class Level implements Updatable, Drawable {
 
+	protected List<GameObject> gameObjects;
 	protected List<Entity> entities;
-	private List<Entity> entitiesToRemove;
+	private List<GameObject> gameObjectsToRemove;
 	protected List<DynamicLight> dLights;	// dynamic Lights
 	protected List<Light> lights;			// all Lights
 	
@@ -55,8 +56,9 @@ public abstract class Level implements Updatable, Drawable {
 	 * @param gridWidth - Set the scale of the grid
 	 */
 	public Level(Camera camera, int gridWidth){
+		this.gameObjects = new ArrayList<GameObject>();
 		this.entities = new ArrayList<Entity>();
-		this.entitiesToRemove = new ArrayList<Entity>();
+		this.gameObjectsToRemove = new ArrayList<GameObject>();
 		this.dLights = new ArrayList<DynamicLight>();
 		this.lights = new ArrayList<Light>();
 		
@@ -79,14 +81,15 @@ public abstract class Level implements Updatable, Drawable {
 	public void update(float delta) {
 		preUpdate(delta);
 		camera.update(delta);
-		for(Entity e : entities){
+		for(GameObject e : gameObjects){
 			e._update(delta);
 		}
 		for(DynamicLight l : dLights){
 			l.update(delta);
 		}
-		entities.removeAll(entitiesToRemove);
-		entitiesToRemove.clear();
+		gameObjects.removeAll(gameObjectsToRemove);
+		entities.removeAll(gameObjectsToRemove);
+		gameObjectsToRemove.clear();
 		postUpdate(delta);
 	}
 	
@@ -165,12 +168,16 @@ public abstract class Level implements Updatable, Drawable {
 	public abstract void drawOverlay(PGraphics g);
 
 	/**
-	 * Add an entity to the level.
-	 * (To be called from the Entity class)
+	 * Add a GameObjects to the level.
+	 * (To be called from the GameObject class)
+	 * 
 	 * @param entity
 	 */
-	void addEntity(Entity entity){
-		entities.add(entity);
+	void addGameObject(GameObject object){
+		gameObjects.add(object);
+		if (object instanceof Entity) {
+			entities.add((Entity) object);
+		}
 	}
 	
 	void addLight(Light light){
@@ -377,9 +384,9 @@ public abstract class Level implements Updatable, Drawable {
 	 * (To be called from the Entity class)
 	 * @param entity
 	 */
-	public void removeEntity(Entity entity){
-		entitiesToRemove.add(entity);
-		entity.removeLevel();
+	public void removeGameObject(GameObject object){
+		gameObjectsToRemove.add(object);
+		object.removeLevel();
 	}
 	
 	public void removeLight(Light light){
