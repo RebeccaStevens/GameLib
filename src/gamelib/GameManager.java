@@ -18,6 +18,9 @@ public final class GameManager {
 	private boolean autoDraw = true;
 	
 	private boolean drawFPS = false;
+
+	private int frameRate;
+	private long frameRateLastedUpdated;
 	
 	/**
 	 * Create a Game Manager.
@@ -92,9 +95,17 @@ public final class GameManager {
 	 * @param g
 	 */
 	private void drawFPS(PGraphics g) {
-		if (sketch.frameRate < 30) {
+		// update the frame rate 20 times per second instead of constantly
+		// for a better overall look
+		long timeStamp = time.getTimeStamp();
+		if (timeStamp > frameRateLastedUpdated + 50) {
+			frameRate = (int) sketch.frameRate;
+			frameRateLastedUpdated = timeStamp;
+		}
+		
+		if (frameRate < 30) {
 			g.fill(255, 0, 0);
-		} else if (sketch.frameRate < 45) {
+		} else if (frameRate < 45) {
 			g.fill(255, 255, 0);
 		} else {
 			g.fill(0, 255, 0);
@@ -102,7 +113,7 @@ public final class GameManager {
 		
 		g.textAlign(PConstants.RIGHT, PConstants.TOP);
 		g.textSize(24);
-		g.text(sketch.frameRate, sketch.width - 10, 10);
+		g.text(frameRate, sketch.width - 10, 10);
 	}
 	
 	public PApplet getSketch(){
