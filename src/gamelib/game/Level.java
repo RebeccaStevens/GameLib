@@ -250,7 +250,7 @@ public abstract class Level implements Updatable, Drawable {
 		switch (entity.getCollisionMode()) {
 		case LESS_THAN_OR_EQUAL_TO:
 			for (Integer key : collisionGroups.keySet()) {
-				if (key <= group) {
+				if (key != 0 && key <= group) {
 					for (Entity ent : collisionGroups.get(key)) {
 						if (isGroundEntity(entity, ent)) {
 							return ent;
@@ -262,7 +262,7 @@ public abstract class Level implements Updatable, Drawable {
 			
 		case GREATER_THAN:
 			for (Integer key : collisionGroups.keySet()) {
-				if (key > group) {
+				if (key != 0 && key > group) {
 					for (Entity ent : collisionGroups.get(key)) {
 						if (isGroundEntity(entity, ent)) {
 							return ent;
@@ -334,12 +334,14 @@ public abstract class Level implements Updatable, Drawable {
 	 */
 	Entity willCollideWithWhenMoved(Entity entity, PVector newLocation) {
 		int group = entity.getCollisionGroup();
-		if (group == 0) return null;
+		if (group == 0) {
+			return null;
+		}
 		
 		switch (entity.getCollisionMode()) {
 		case LESS_THAN_OR_EQUAL_TO:
 			for (Integer key : collisionGroups.keySet()) {
-				if (key <= group) {
+				if (key != 0 && key <= group) {
 					for (Entity ent : collisionGroups.get(key)) {
 						if (willCollide(entity, ent, newLocation)) {
 							return ent;
@@ -351,7 +353,7 @@ public abstract class Level implements Updatable, Drawable {
 			
 		case GREATER_THAN:
 			for (Integer key : collisionGroups.keySet()) {
-				if (key > group) {
+				if (key != 0 && key > group) {
 					for (Entity ent : collisionGroups.get(key)) {
 						if (willCollide(entity, ent, newLocation)) {
 							return ent;
@@ -412,7 +414,7 @@ public abstract class Level implements Updatable, Drawable {
 		switch (entity.getCollisionMode()) {
 		case LESS_THAN_OR_EQUAL_TO:
 			for (Integer key : collisionGroups.keySet()) {
-				if (key <= group) {
+				if (key != 0 && key <= group) {
 					for (Entity ent : collisionGroups.get(key)) {
 						return isColliding(entity, ent);
 					}
@@ -422,7 +424,7 @@ public abstract class Level implements Updatable, Drawable {
 			
 		case GREATER_THAN:
 			for (Integer key : collisionGroups.keySet()) {
-				if (key > group) {
+				if (key != 0 && key > group) {
 					for (Entity ent : collisionGroups.get(key)) {
 						return isColliding(entity, ent);
 					}
@@ -650,7 +652,10 @@ public abstract class Level implements Updatable, Drawable {
 	 * @return
 	 */
 	private boolean needToCheckForCollision(Entity entity1, Entity entity2) {
-		if (entity1.getCollisionGroup() == 0) {
+		int ent1Group = entity1.getCollisionGroup();
+		int ent2Group = entity2.getCollisionGroup();
+		
+		if (ent1Group == 0 || ent2Group == 0) {
 			return false;
 		}
 		
@@ -660,11 +665,11 @@ public abstract class Level implements Updatable, Drawable {
 		
 		switch (entity1.getCollisionMode()) {
 		case EQUAL_TO:
-			return entity2.getCollisionGroup() == entity1.getCollisionGroup();
+			return ent2Group == ent1Group;
 		case LESS_THAN_OR_EQUAL_TO:
-			return entity2.getCollisionGroup() <= entity1.getCollisionGroup();
+			return ent2Group <= ent1Group;
 		case GREATER_THAN:
-			return entity2.getCollisionGroup() >  entity1.getCollisionGroup();
+			return ent2Group >  ent1Group;
 		default:
 			return false;
 		}
