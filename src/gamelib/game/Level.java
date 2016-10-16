@@ -3,6 +3,7 @@ package gamelib.game;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ public abstract class Level implements Updatable, Drawable {
 
 	private final List<GameObject> gameObjects;
 	private final List<Entity> entities;
+	private final Collection<Entity> unmodifiableEntities;
 	private final List<GameObject> gameObjectsToRemove;
 	private final List<DynamicLight> dLights;	// dynamic Lights
 	private final List<Light> lights;			// all Lights
@@ -68,6 +70,7 @@ public abstract class Level implements Updatable, Drawable {
 	public Level(Camera camera, int gridWidth){
 		this.gameObjects = new ArrayList<GameObject>();
 		this.entities = new ArrayList<Entity>();
+		this.unmodifiableEntities = Collections.unmodifiableCollection(entities);
 		this.gameObjectsToRemove = new ArrayList<GameObject>();
 		this.dLights = new ArrayList<DynamicLight>();
 		this.lights = new ArrayList<Light>();
@@ -186,7 +189,7 @@ public abstract class Level implements Updatable, Drawable {
 	 * @return
 	 */
 	protected Collection<Entity> getEntitiesToDraw() {
-		return entities;
+		return unmodifiableEntities;
 	}
 
 	/**
