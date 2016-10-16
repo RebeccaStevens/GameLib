@@ -23,12 +23,12 @@ import processing.core.PVector;
  */
 public abstract class Level implements Updatable, Drawable {
 
-	private final List<GameObject> gameObjects;
-	private final List<Entity> entities;
+	private final Set<GameObject> gameObjects;
+	private final Set<Entity> entities;
 	private final Collection<Entity> unmodifiableEntities;
-	private final List<GameObject> gameObjectsToRemove;
-	private final List<DynamicLight> dLights;	// dynamic Lights
-	private final List<Light> lights;			// all Lights
+	private final Set<GameObject> gameObjectsToRemove;
+	private final Set<DynamicLight> dLights;	// dynamic Lights
+	private final Set<Light> lights;			// all Lights
 	
 	private final Map<Integer, List<Entity>> collisionGroups;
 	
@@ -68,12 +68,12 @@ public abstract class Level implements Updatable, Drawable {
 	 * @param gridWidth - Set the scale of the grid
 	 */
 	public Level(Camera camera, int gridWidth){
-		this.gameObjects = new ArrayList<GameObject>();
-		this.entities = new ArrayList<Entity>();
+		this.gameObjects = new LinkedHashSet<GameObject>();
+		this.entities = new LinkedHashSet<Entity>();
 		this.unmodifiableEntities = Collections.unmodifiableCollection(entities);
-		this.gameObjectsToRemove = new ArrayList<GameObject>();
-		this.dLights = new ArrayList<DynamicLight>();
-		this.lights = new ArrayList<Light>();
+		this.gameObjectsToRemove = new LinkedHashSet<GameObject>();
+		this.dLights = new LinkedHashSet<DynamicLight>();
+		this.lights = new LinkedHashSet<Light>();
 		
 		this.collisionGroups = new HashMap<Integer, List<Entity>>();
 		
