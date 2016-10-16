@@ -525,6 +525,15 @@ public abstract class Level implements Updatable, Drawable {
 	public float getZoom() {
 		return zoom;
 	}
+	
+	/**
+	 * Get a collection of all the entities in the level.
+	 * .
+	 * @return
+	 */
+	public Collection<Entity> getEntities() {
+		return unmodifiableEntities;
+	}
 
 	/**
 	 * Set the amount of air friction in the level.
