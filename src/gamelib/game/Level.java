@@ -46,14 +46,14 @@ public abstract class Level implements Updatable, Drawable {
 	private float zoom = 1;
 	
 	/**
-	 * Create a level with a static camera
+	 * Create a level with a static camera and a grid with of 16.
 	 */
 	public Level(){
 		this(null);
 	}
 	
 	/**
-	 * Create a level with the given camera.
+	 * Create a level with the given camera and a grid with of 16.
 	 * 
 	 * @param camera
 	 */
