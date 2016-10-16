@@ -484,13 +484,13 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * Apply the limits the rotation of this entity.
 	 */
 	protected void applyRotationLimits() {
-		if (!Float.isNaN(minRotation.x)) rotation.x = Math.max(rotation.x - rotationOffset.x, minRotation.x);
-		if (!Float.isNaN(minRotation.y)) rotation.y = Math.max(rotation.y - rotationOffset.y, minRotation.y);
-		if (!Float.isNaN(minRotation.z)) rotation.z = Math.max(rotation.z - rotationOffset.z, minRotation.z);
+		if (!Float.isNaN(minRotation.x)) rotation.x = Math.max(rotation.x + rotationOffset.x, minRotation.x) - rotationOffset.x;
+		if (!Float.isNaN(minRotation.y)) rotation.y = Math.max(rotation.y + rotationOffset.y, minRotation.y) - rotationOffset.y;
+		if (!Float.isNaN(minRotation.z)) rotation.z = Math.max(rotation.z + rotationOffset.z, minRotation.z) - rotationOffset.z;
 		
-		if (!Float.isNaN(maxRotation.x)) rotation.x = Math.min(rotation.x - rotationOffset.x, maxRotation.x);
-		if (!Float.isNaN(maxRotation.y)) rotation.y = Math.min(rotation.y - rotationOffset.y, maxRotation.y);
-		if (!Float.isNaN(maxRotation.z)) rotation.z = Math.min(rotation.z - rotationOffset.z, maxRotation.z);
+		if (!Float.isNaN(maxRotation.x)) rotation.x = Math.min(rotation.x + rotationOffset.x, maxRotation.x) - rotationOffset.x;
+		if (!Float.isNaN(maxRotation.y)) rotation.y = Math.min(rotation.y + rotationOffset.y, maxRotation.y) - rotationOffset.y;
+		if (!Float.isNaN(maxRotation.z)) rotation.z = Math.min(rotation.z + rotationOffset.z, maxRotation.z) - rotationOffset.z;
 	}
 
 	/**
@@ -636,7 +636,14 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * @return the rotation
 	 */
 	public float getRotation2D(){
-		return rotation.x + rotationOffset.x;
+		float rot = rotation.x + rotationOffset.x;
+		if (!Float.isNaN(minRotation.x)) {
+			rot = Math.max(rot, minRotation.x);
+		}
+		if (!Float.isNaN(maxRotation.x)) {
+			rot = Math.min(rot, maxRotation.x);
+		}
+		return rot;
 	}
 
 	/**
@@ -654,7 +661,7 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * @return the rotation
 	 */
 	public PVector getRotation3D(){
-		return PVector.add(rotation, rotationOffset);
+		return new PVector(getRotation3DTilt(), getRotation3DPan(), getRotation3DRoll());
 	}
 
 	/**
@@ -663,7 +670,14 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * @return the tilt rotation
 	 */
 	public float getRotation3DTilt(){
-		return rotation.x + rotationOffset.x;
+		float tilt = rotation.x + rotationOffset.x;
+		if (!Float.isNaN(minRotation.x)) {
+			tilt = Math.max(tilt, minRotation.x);
+		}
+		if (!Float.isNaN(maxRotation.x)) {
+			tilt = Math.min(tilt, maxRotation.x);
+		}
+		return tilt;
 	}
 
 	/**
@@ -672,7 +686,14 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * @return the pan rotation
 	 */
 	public float getRotation3DPan(){
-		return rotation.y + rotationOffset.y;
+		float pan = rotation.y + rotationOffset.y;
+		if (!Float.isNaN(minRotation.y)) {
+			pan = Math.max(pan, minRotation.y);
+		}
+		if (!Float.isNaN(maxRotation.y)) {
+			pan = Math.min(pan, maxRotation.y);
+		}
+		return pan;
 	}
 
 	/**
@@ -681,7 +702,14 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * @return the roll rotation
 	 */
 	public float getRotation3DRoll(){
-		return rotation.z + rotationOffset.z;
+		float roll = rotation.z + rotationOffset.z;
+		if (!Float.isNaN(minRotation.z)) {
+			roll = Math.max(roll, minRotation.z);
+		}
+		if (!Float.isNaN(maxRotation.z)) {
+			roll = Math.min(roll, maxRotation.z);
+		}
+		return roll;
 	}
 	
 	/**

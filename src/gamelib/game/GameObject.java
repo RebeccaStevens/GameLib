@@ -150,26 +150,26 @@ public abstract class GameObject implements Updatable {
 	 * Apply the limits the location of this entity.
 	 */
 	protected void applyLocationLimits() {
-		if (!Float.isNaN(minLocation.x)) location.x = Math.max(getX(), minLocation.x);
-		if (!Float.isNaN(minLocation.y)) location.y = Math.max(getY(), minLocation.y);
-		if (!Float.isNaN(minLocation.z)) location.z = Math.max(getZ(), minLocation.z);
+		if (!Float.isNaN(minLocation.x)) location.x = Math.max(location.x + locationOffset.x, minLocation.x) - locationOffset.x;
+		if (!Float.isNaN(minLocation.y)) location.y = Math.max(location.y + locationOffset.y, minLocation.y) - locationOffset.y;
+		if (!Float.isNaN(minLocation.z)) location.z = Math.max(location.z + locationOffset.z, minLocation.z) - locationOffset.z;
 	
-		if (!Float.isNaN(maxLocation.x)) location.x = Math.min(getX(), maxLocation.x);
-		if (!Float.isNaN(maxLocation.y)) location.y = Math.min(getY(), maxLocation.y);
-		if (!Float.isNaN(maxLocation.z)) location.z = Math.min(getZ(), maxLocation.z);
+		if (!Float.isNaN(maxLocation.x)) location.x = Math.min(location.x + locationOffset.x, maxLocation.x) - locationOffset.x;
+		if (!Float.isNaN(maxLocation.y)) location.y = Math.min(location.y + locationOffset.y, maxLocation.y) - locationOffset.y;
+		if (!Float.isNaN(maxLocation.z)) location.z = Math.min(location.z + locationOffset.z, maxLocation.z) - locationOffset.z;
 	}
 
 	/**
 	 * Apply the limits the motion of this entity.
 	 */
 	protected void applyMotionLimits() {
-		if (!Float.isNaN(minVelocity.x)) velocity.x = Math.max(getVelocityX(), minVelocity.x);
-		if (!Float.isNaN(minVelocity.y)) velocity.y = Math.max(getVelocityY(), minVelocity.y);
-		if (!Float.isNaN(minVelocity.z)) velocity.z = Math.max(getVelocityZ(), minVelocity.z);
+		if (!Float.isNaN(minVelocity.x)) velocity.x = Math.max(velocity.x + velocityOffset.x, minVelocity.x) - velocityOffset.x;
+		if (!Float.isNaN(minVelocity.y)) velocity.y = Math.max(velocity.y + velocityOffset.y, minVelocity.y) - velocityOffset.y;
+		if (!Float.isNaN(minVelocity.z)) velocity.z = Math.max(velocity.z + velocityOffset.z, minVelocity.z) - velocityOffset.z;
 	
-		if (!Float.isNaN(maxVelocity.x)) velocity.x = Math.min(getVelocityX(), maxVelocity.x);
-		if (!Float.isNaN(maxVelocity.y)) velocity.y = Math.min(getVelocityZ(), maxVelocity.y);
-		if (!Float.isNaN(maxVelocity.z)) velocity.z = Math.min(getVelocityY(), maxVelocity.z);
+		if (!Float.isNaN(maxVelocity.x)) velocity.x = Math.min(velocity.x + velocityOffset.x, maxVelocity.x) - velocityOffset.x;
+		if (!Float.isNaN(maxVelocity.y)) velocity.y = Math.min(velocity.y + velocityOffset.y, maxVelocity.y) - velocityOffset.y;
+		if (!Float.isNaN(maxVelocity.z)) velocity.z = Math.min(velocity.z + velocityOffset.z, maxVelocity.z) - velocityOffset.z;
 	
 		if(!Float.isNaN(maxHorizontalVelocity)){
 			PVector temp = getVelocity();
@@ -177,8 +177,8 @@ public abstract class GameObject implements Updatable {
 			if(temp.mag() > maxHorizontalVelocity){
 				temp.normalize();
 				temp.mult(maxHorizontalVelocity);
-				velocity.x = temp.x;
-				velocity.z = temp.z;
+				velocity.x = temp.x - velocityOffset.x;
+				velocity.z = temp.z - velocityOffset.y;
 			}
 		}
 	}
@@ -211,7 +211,14 @@ public abstract class GameObject implements Updatable {
 	 * @return the x location
 	 */
 	public float getX() {
-		return location.x + locationOffset.x;
+		float x = location.x + locationOffset.x;
+		if (!Float.isNaN(minLocation.x)) {
+			x = Math.max(x, minLocation.x);
+		}
+		if (!Float.isNaN(maxLocation.x)) {
+			x = Math.min(x, maxLocation.x);
+		}
+		return x;
 	}
 
 	/**
@@ -229,7 +236,14 @@ public abstract class GameObject implements Updatable {
 	 * @return the y location
 	 */
 	public float getY() {
-		return location.y + locationOffset.y;
+		float y = location.y + locationOffset.y;
+		if (!Float.isNaN(minLocation.y)) {
+			return Math.max(y, minLocation.y);
+		}
+		if (!Float.isNaN(maxLocation.y)) {
+			y = Math.min(y, maxLocation.y);
+		}
+		return y;
 	}
 
 	/**
@@ -247,7 +261,14 @@ public abstract class GameObject implements Updatable {
 	 * @return the z location
 	 */
 	public float getZ() {
-		return location.z + locationOffset.z;
+		float z = location.z + locationOffset.z;
+		if (!Float.isNaN(minLocation.z)) {
+			return Math.max(z, minLocation.z);
+		}
+		if (!Float.isNaN(maxLocation.z)) {
+			z = Math.min(z, maxLocation.z);
+		}
+		return z;
 	}
 
 	/**
@@ -319,7 +340,14 @@ public abstract class GameObject implements Updatable {
 	 * @return the x velocity
 	 */
 	public float getVelocityX() {
-		return velocity.x + velocityOffset.x;
+		float vx = velocity.x + velocityOffset.x;
+		if (!Float.isNaN(minVelocity.x)) {
+			vx = Math.max(vx, minVelocity.x);
+		}
+		if (!Float.isNaN(maxVelocity.x)) {
+			vx = Math.min(vx, maxVelocity.x);
+		}
+		return vx;
 	}
 
 	/**
@@ -328,7 +356,14 @@ public abstract class GameObject implements Updatable {
 	 * @return the y velocity
 	 */
 	public float getVelocityY() {
-		return velocity.y + velocityOffset.y;
+		float vy = velocity.y + velocityOffset.y;
+		if (!Float.isNaN(minVelocity.y)) {
+			vy = Math.max(vy, minVelocity.y);
+		}
+		if (!Float.isNaN(maxVelocity.y)) {
+			vy = Math.min(vy, maxVelocity.y);
+		}
+		return vy;
 	}
 
 	/**
@@ -337,7 +372,14 @@ public abstract class GameObject implements Updatable {
 	 * @return the z velocity
 	 */
 	public float getVelocityZ(){
-		return velocity.z + velocityOffset.z;
+		float vz = velocity.z + velocityOffset.z;
+		if (!Float.isNaN(minVelocity.z)) {
+			vz = Math.max(vz, minVelocity.z);
+		}
+		if (!Float.isNaN(maxVelocity.z)) {
+			vz = Math.min(vz, maxVelocity.z);
+		}
+		return vz;
 	}
 
 	/**
