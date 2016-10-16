@@ -640,7 +640,7 @@ public abstract class Level implements Updatable, Drawable {
 	}
 
 	/**
-	 * Remove the all given entities from the level.
+	 * Remove the all given game objects from the level.
 	 * 
 	 * @param toRemove
 	 */
@@ -698,7 +698,7 @@ public abstract class Level implements Updatable, Drawable {
 	}
 	
 	/**
-	 * Convert game units (for x position) to pixels.
+	 * Convert game units (for x location) to pixels.
 	 * 
 	 * @param gameUnits
 	 * @return
@@ -708,7 +708,7 @@ public abstract class Level implements Updatable, Drawable {
 	}
 	
 	/**
-	 * Convert game units (for y position) to pixels.
+	 * Convert game units (for y location) to pixels.
 	 * 
 	 * @param gameUnits
 	 * @return
@@ -718,7 +718,7 @@ public abstract class Level implements Updatable, Drawable {
 	}
 	
 	/**
-	 * Convert game units (for z position) to pixels.
+	 * Convert game units (for z location) to pixels.
 	 * 
 	 * @param gameUnits
 	 * @return
