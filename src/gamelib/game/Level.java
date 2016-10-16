@@ -184,21 +184,24 @@ public abstract class Level implements Updatable, Drawable {
 	public abstract void drawOverlay(PGraphics g);
 	
 	/**
-	 * Add a GameObjects to the level.
-	 * (To be called from the GameObject class)
+	 * Add an entity to the level.
+	 * (To be called from the {@link Entity} class)
 	 * 
 	 * @param entity
 	 */
-	void addGameObject(GameObject object){
-		if (object instanceof Camera) {
-			return;
-		}
+	void addEntity(Entity entity) {
+		entities.add(entity);
+		addEntityToCollisionGroup(entity);
+		addGameObject(entity);
+	}
+	
+	/**
+	 * Add a game object to the level.
+	 * 
+	 * @param object
+	 */
+	void addGameObject(GameObject object) {
 		gameObjects.add(object);
-		if (object instanceof Entity) {
-			Entity ent = (Entity) object;
-			entities.add(ent);
-			addEntityToCollisionGroup(ent);
-		}
 	}
 	
 	void addLight(Light light){
@@ -620,6 +623,16 @@ public abstract class Level implements Updatable, Drawable {
 	 * (To be called from the Entity class)
 	 * 
 	 * @param entity
+	 */
+	void removeEntity(Entity entity){
+		removeGameObject(entity);
+	}
+
+	/**
+	 * Remove a game object from the level.
+	 * (To be called from the Entity class)
+	 * 
+	 * @param object
 	 */
 	void removeGameObject(GameObject object){
 		gameObjectsToRemove.add(object);

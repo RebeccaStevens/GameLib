@@ -23,12 +23,9 @@ public abstract class Level2D extends Level {
 	}
 	
 	@Override
-	void addGameObject(GameObject object) {
-		super.addGameObject(object);
-		if (object instanceof Entity) {
-			Entity entity = (Entity) object;
-			sortedEntities.add(entity);
-		}
+	void addEntity(Entity entity) {
+		super.addEntity(entity);
+		sortedEntities.add(entity);
 	}
 
 	/**

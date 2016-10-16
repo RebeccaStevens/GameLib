@@ -879,6 +879,19 @@ public abstract class Entity extends GameObject implements Drawable {
 		if(mass<=0) throw new RuntimeException("Can not set mass to zero or a negitive value.");
 		this.mass = mass;
 	}
+	
+	/**
+	 * Set the level that this entity is in.
+	 * 
+	 * @param level
+	 */
+	@Override
+	void setLevel(Level level) {
+		super.setLevel(level);
+		if (level != null) {
+			level.addEntity(this);
+		}
+	}
 
 	/**
 	 * Set whether or not this entity is effected by gravity.

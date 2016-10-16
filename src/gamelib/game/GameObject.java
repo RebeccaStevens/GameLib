@@ -677,7 +677,7 @@ public abstract class GameObject implements Updatable {
 			remove();
 		} else {
 			this.level = level;
-			level.addGameObject(this);
+			this.level.addGameObject(this);
 		}
 	}
 
