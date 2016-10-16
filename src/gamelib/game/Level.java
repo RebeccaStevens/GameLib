@@ -765,4 +765,34 @@ public abstract class Level implements Updatable, Drawable {
 	float convertGridUnitsDepthToPixels(float gameUnits) {
 		return convertGridUnitsWidthToPixels(gameUnits);
 	}
+
+	/**
+	 * Convert pixels (for x location) to game units.
+	 * 
+	 * @param pixels
+	 * @return
+	 */
+	float convertPixelsXToGridUnits(float pixels) {
+		return pixels * this.gridWidth / this.zoom / GameManager.getMe().getGameScene().getGameWidth();
+	}
+
+	/**
+	 * Convert pixels (for y location) to game units.
+	 * 
+	 * @param pixels
+	 * @return
+	 */
+	float convertPixelsYToGridUnits(float pixels) {
+		return (GameManager.getMe().getGameScene().getGameHeight() * this.gridHeight - pixels * this.gridHeight) / GameManager.getMe().getGameScene().getGameHeight() / this.zoom;
+	}
+
+	/**
+	 * Convert pixels (for z location) to game units.
+	 * 
+	 * @param pixels
+	 * @return
+	 */
+	float convertPixelsZToGridUnits(float pixels) {
+		return convertPixelsXToGridUnits(pixels);
+	}
 }
