@@ -184,15 +184,6 @@ public abstract class Level implements Updatable, Drawable {
 	public abstract void drawOverlay(PGraphics g);
 	
 	/**
-	 * Get the collection of entities to draw.
-	 * .
-	 * @return
-	 */
-	protected Collection<Entity> getEntitiesToDraw() {
-		return unmodifiableEntities;
-	}
-
-	/**
 	 * Add a GameObjects to the level.
 	 * (To be called from the GameObject class)
 	 * 
@@ -240,22 +231,6 @@ public abstract class Level implements Updatable, Drawable {
 	void updateEntityCollisionGroup(Entity entity, int oldGroup) {
 		collisionGroups.get(oldGroup).remove(entity);
 		addEntityToCollisionGroup(entity);
-	}
-
-	/**
-	 * Get the amount of air friction in the level.
-	 * @return
-	 */
-	public float getAirFriction() {
-		return airFriction;
-	}
-
-	/**
-	 * Get the gravity on the level.
-	 * @return
-	 */
-	PVector getGravity() {
-		return gravity;
 	}
 
 	/**
@@ -518,6 +493,24 @@ public abstract class Level implements Updatable, Drawable {
 	}
 
 	/**
+	 * Get the amount of air friction in the level.
+	 * 
+	 * @return
+	 */
+	public float getAirFriction() {
+		return airFriction;
+	}
+
+	/**
+	 * Get the gravity on the level.
+	 * 
+	 * @return
+	 */
+	public PVector getGravity() {
+		return gravity;
+	}
+
+	/**
 	 * Get the zoom level.
 	 * 
 	 * @return
@@ -532,6 +525,15 @@ public abstract class Level implements Updatable, Drawable {
 	 * @return
 	 */
 	public Collection<Entity> getEntities() {
+		return unmodifiableEntities;
+	}
+
+	/**
+	 * Get the collection of entities to draw.
+	 * .
+	 * @return
+	 */
+	protected Collection<Entity> getEntitiesToDraw() {
 		return unmodifiableEntities;
 	}
 
