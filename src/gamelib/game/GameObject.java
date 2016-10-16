@@ -386,20 +386,6 @@ abstract class GameObject implements Updatable {
 	}
 	
 	/**
-	 * Set the level that this entity is in.
-	 * 
-	 * @param level
-	 */
-	void setLevel(Level level) {
-		if (level == null) {
-			remove();
-		} else {
-			this.level = level;
-			level.addGameObject(this);
-		}
-	}
-
-	/**
 	 * Add to the x location of the entity.
 	 * 
 	 * @param x
@@ -639,6 +625,20 @@ abstract class GameObject implements Updatable {
 		velocityOffset.add(v);
 	}
 	
+	/**
+	 * Set the level that this entity is in.
+	 * 
+	 * @param level
+	 */
+	void setLevel(Level level) {
+		if (level == null) {
+			remove();
+		} else {
+			this.level = level;
+			level.addGameObject(this);
+		}
+	}
+
 	/**
 	 * Set the x location of the entity.
 	 * 
@@ -882,7 +882,7 @@ abstract class GameObject implements Updatable {
 	/**
 	 * Remove this entity from the level it is in.
 	 */
-	public void remove(){
+	public void remove() {
 		this.level.removeGameObject(this);
 	}
 
