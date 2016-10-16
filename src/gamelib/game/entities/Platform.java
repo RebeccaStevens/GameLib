@@ -6,6 +6,7 @@ import processing.core.PConstants;
 
 public abstract class Platform extends Entity {
 	
+	private static int defaultCollisionGroup = 1;
 	private float groundFriction;
 
 	public Platform(Level level, float x, float y, float width, float height) {
@@ -19,7 +20,7 @@ public abstract class Platform extends Entity {
 	}
 	
 	private void init(){
-		setCollisionGroup(0);
+		setCollisionGroup(defaultCollisionGroup);
 		setGroundFriction(10);
 	}
 
@@ -30,5 +31,23 @@ public abstract class Platform extends Entity {
 
 	public void setGroundFriction(float groundFriction) {
 		this.groundFriction = groundFriction;
+	}
+
+	/**
+	 * Get the collision group platforms will be put into by default.
+	 * 
+	 * @return
+	 */
+	public static final int getDefaultCollisionGroup() {
+		return defaultCollisionGroup;
+	}
+
+	/**
+	 * Set the collision group platforms will be put into by default.
+	 * 
+	 * @param group
+	 */
+	public static final void setDefaultCollisionGroup(int group) {
+		defaultCollisionGroup = group;
 	}
 }

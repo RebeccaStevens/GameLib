@@ -7,6 +7,7 @@ import processing.core.PVector;
 
 public abstract class PushableEntity extends Entity {
 	
+	private static int defaultCollisionGroup = 2;
 	private float resistance;
 
 	/**
@@ -64,10 +65,28 @@ public abstract class PushableEntity extends Entity {
 	
 	private final void init(float resistance){
 		this.resistance = resistance;
-		setCollisionGroup(1);
+		setCollisionGroup(defaultCollisionGroup);
 	}
 	
 	public float getResistance(){
 		return this.resistance;
+	}
+
+	/**
+	 * Get the collision group pushable entities will be put into by default.
+	 * 
+	 * @return
+	 */
+	public static final int getDefaultCollisionGroup() {
+		return defaultCollisionGroup;
+	}
+
+	/**
+	 * Set the collision group pushable entities will be put into by default.
+	 * 
+	 * @param group
+	 */
+	public static final void setDefaultCollisionGroup(int group) {
+		defaultCollisionGroup = group;
 	}
 }
