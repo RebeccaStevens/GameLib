@@ -5,6 +5,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * An abstract level for 2D games.
+ * 
+ * @author Rebecca Stevens
+ */
 public abstract class Level2D extends Level {
 
 	private boolean entitiesNeedResorting;
@@ -16,15 +21,21 @@ public abstract class Level2D extends Level {
 		entityLayerComparator = new EntityLayerComparator();
 	}
 
-	public void addGameObject(Entity ent, float layer){
-		super.addGameObject(ent);
-		entityLayer.put(ent, layer);
+	/**
+	 * Set what layer the entity should be drawn on.
+	 * By default, entities are on layer 0.
+	 * 
+	 * @param entity
+	 * @param layer
+	 */
+	public void setEntityLayer(Entity entity, float layer){
+		entityLayer.put(entity, layer);
 		entitiesNeedResorting = true;
 	}
 	
 	@Override
 	public final void update(float delta){
-		if(entitiesNeedResorting){
+		if (entitiesNeedResorting) {
 			Collections.sort(entities, entityLayerComparator);
 			entitiesNeedResorting = false;
 		}
@@ -36,6 +47,11 @@ public abstract class Level2D extends Level {
 		return false;
 	}
 	
+	/**
+	 * A Comparator for sorting entities by what layer they are on.
+	 * 
+	 * @author Rebecca Stevens
+	 */
 	private class EntityLayerComparator implements Comparator<Entity> {
 		@Override
 		public int compare(Entity e1, Entity e2){
