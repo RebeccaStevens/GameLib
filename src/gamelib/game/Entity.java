@@ -36,6 +36,8 @@ public abstract class Entity extends GameObject implements Drawable {
 	private final Set<Entity> attachedEntities;
 	private final Set<Entity> entitiesOnMe;
 	
+	private Entity collidedWith;
+	
 	enum CollisionMode {
 		LESS_THAN_OR_EQUAL_TO, EQUAL_TO, GREATER_THAN;
 	}
@@ -197,6 +199,8 @@ public abstract class Entity extends GameObject implements Drawable {
 			return;
 		}
 		
+		collidedWith = null;
+		
 		update(delta);
 		
 		if (getLevel() == null) {
@@ -240,6 +244,9 @@ public abstract class Entity extends GameObject implements Drawable {
 		applyLocationLimits();
 		applyRotationLimits();
 		groundDetection();
+		if (collidedWith != null) {
+			onCollidesWith(collidedWith);
+		}
 	}
 
 	private final boolean updateAttached(float delta){
@@ -265,6 +272,10 @@ public abstract class Entity extends GameObject implements Drawable {
 	 */
 	private boolean moveTry(PVector newLocation, PVector currentLocation) {
 		Entity willCollideWith = getLevel().willCollideWithWhenMoved(this, newLocation);
+		
+		if (collidedWith == null) {
+			collidedWith = willCollideWith;
+		}
 		
 		PVector dLocation = PVector.sub(newLocation, currentLocation);
 		
@@ -339,6 +350,13 @@ public abstract class Entity extends GameObject implements Drawable {
 		
 		return super.getMoveToLocation(delta);
 	}
+	
+	/**
+	 * Called when this entity collides with another entity.
+	 * 
+	 * @param entityCollidedWith
+	 */
+	public abstract void onCollidesWith(Entity entityCollidedWith);
 	
 	/**
 	 * Draw the entity.

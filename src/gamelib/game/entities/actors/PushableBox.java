@@ -1,5 +1,6 @@
 package gamelib.game.entities.actors;
 
+import gamelib.game.Entity;
 import gamelib.game.Level;
 import gamelib.game.entities.PushableEntity;
 import processing.core.PConstants;
@@ -66,5 +67,10 @@ public class PushableBox extends PushableEntity {
 		g.style(style);
 		g.rectMode = PConstants.CENTER;
 		g.box(getWidthInPixels(), getHeightInPixels(), getDepthInPixels());
+	}
+	
+	@Override
+	public void onCollidesWith(Entity entityCollidedWith) {
+		
 	}
 }

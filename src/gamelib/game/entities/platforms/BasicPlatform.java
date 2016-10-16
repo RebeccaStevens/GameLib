@@ -1,5 +1,6 @@
 package gamelib.game.entities.platforms;
 
+import gamelib.game.Entity;
 import gamelib.game.Level;
 import gamelib.game.entities.Platform;
 import processing.core.PConstants;
@@ -60,5 +61,10 @@ public class BasicPlatform extends Platform {
 		g.style(style);
 		g.rectMode = PConstants.CENTER;
 		g.box(getWidthInPixels(), getHeightInPixels(), getDepthInPixels());
+	}
+
+	@Override
+	public void onCollidesWith(Entity entityCollidedWith) {
+		
 	}
 }
