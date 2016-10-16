@@ -129,6 +129,39 @@ public abstract class Camera extends GameObject {
 		removeLimitAbsoluteYMax();
 	}
 	
+	/**
+	 * Get the x location of this camera limited by the camera absolute limits (in game units);
+	 * 
+	 * @return
+	 */
+	public float getXLimited() {
+		float x = getXInPixels();
+		if (!Float.isNaN(minAbsoluteLocation.x)) {
+			x = Math.max(x, minAbsoluteLocation.x);
+		}
+		if (!Float.isNaN(maxAbsoluteLocation.x)) {
+			x = Math.min(x, maxAbsoluteLocation.x);
+		}
+		return getLevel().convertPixelsXToGridUnits(x - (GameManager.getMe().getGameScene().getGameWidth() / 2));
+	}
+
+	
+	/**
+	 * Get the y location of this camera limited by the camera absolute limits (in game units);
+	 * 
+	 * @return
+	 */
+	public float getYLimited() {
+		float y = getYInPixels();
+		if (!Float.isNaN(minAbsoluteLocation.y)) {
+			y = Math.max(y, minAbsoluteLocation.y);
+		}
+		if (!Float.isNaN(maxAbsoluteLocation.y)) {
+			y = Math.min(y, maxAbsoluteLocation.y);
+		}
+		return getLevel().convertPixelsYToGridUnits(y + (GameManager.getMe().getGameScene().getGameHeight() / 2));
+	}
+	
 	@Override
 	public float getXInPixels() {
 		float x = super.getXInPixels();
