@@ -1,6 +1,7 @@
 package gamelib.game;
 
 import java.security.InvalidParameterException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ public abstract class Entity extends GameObject implements Drawable {
 	private final Set<Entity> entitiesOnMe;
 	
 	enum CollisionMode {
-		GREATER_THAN_OR_EQUAL_TO, EQUAL_TO, LESS_THAN;
+		LESS_THAN_OR_EQUAL_TO, EQUAL_TO, GREATER_THAN;
 	}
 
 	/**
@@ -120,8 +121,7 @@ public abstract class Entity extends GameObject implements Drawable {
 		
 		this.mass = 1;
 		this.gravityEffected = false;
-		this.collisionGroup = 1;
-		this.collisionMode = CollisionMode.GREATER_THAN_OR_EQUAL_TO;
+		this.collisionMode = CollisionMode.LESS_THAN_OR_EQUAL_TO;
 		
 		this.ground = null;
 		
@@ -200,7 +200,7 @@ public abstract class Entity extends GameObject implements Drawable {
 		setVelocityOffset(0, 0, 0);
 		
 		PVector newLocation = getMoveToLocation(delta);
-		return getLevel().canMove(this, newLocation) == null;
+		return getLevel().willCollideWithWhenMoved(this, newLocation) == null;
 	}
 
 	/**
@@ -210,7 +210,7 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * @return whether or not the move was successful
 	 */
 	private boolean moveTry(PVector newLocation, PVector currentLocation) {
-		Entity willCollideWith = getLevel().canMove(this, newLocation);
+		Entity willCollideWith = getLevel().willCollideWithWhenMoved(this, newLocation);
 		
 		PVector dLocation = PVector.sub(newLocation, currentLocation);
 		
@@ -231,14 +231,14 @@ public abstract class Entity extends GameObject implements Drawable {
 		for(Entity ent : attachedEntities){
 			PVector nl = ent.getLocation();
 			nl.add(dLocation);
-			if(level.canMove(ent, nl ) == null){
+			if(level.willCollideWithWhenMoved(ent, nl ) == null){
 				ent.setLocation(nl);
 			}
 		}
 		for(Entity ent : entitiesOnMe){
 			PVector nl = ent.getLocation();
 			nl.add(dLocation);
-			if(level.canMove(ent, nl ) == null){
+			if(level.willCollideWithWhenMoved(ent, nl ) == null){
 				ent.setLocation(nl);
 			}
 		}
@@ -249,7 +249,7 @@ public abstract class Entity extends GameObject implements Drawable {
 		PVector pusheeDLocation = PVector.mult(dLocation, 1-resistance);
 		PVector pusheeNewLocation = PVector.add(pushee.getLocation(), pusheeDLocation);
 		
-		if(getLevel().canMove(pushee, pusheeNewLocation) != null) {
+		if(getLevel().willCollideWithWhenMoved(pushee, pusheeNewLocation) != null) {
 			return false;
 		}
 
@@ -318,7 +318,7 @@ public abstract class Entity extends GameObject implements Drawable {
 		g.popStyle();
 		g.popMatrix();
 		
-		if (level.isDrawBoundingBoxes()) {
+		if (level.isDrawingBoundingBoxes()) {
 			drawBoundingBox(g);
 		}
 	}
@@ -486,7 +486,23 @@ public abstract class Entity extends GameObject implements Drawable {
 		entity.addVelocity(getVelocity());
 	}
 	
-	
+	/**
+	 * Ignore the given entity during collision detection.
+	 * 
+	 * @param entity
+	 */
+	public void ignoreInCollisions(Entity entity){
+		collisionIgnore.add(entity);
+	}
+
+	/**
+	 * Stop ignoring the given entity during collision detection.
+	 * 
+	 * @param entity
+	 */
+	public void unignoreInCollisions(Entity entity){
+		collisionIgnore.remove(entity);
+	}
 
 	/**
 	 * Get the width of this entity (in grid units).
@@ -733,7 +749,7 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * 
 	 * @return
 	 */
-	int getCollisionGroup() {
+	public int getCollisionGroup() {
 		return collisionGroup;
 	}
 	
@@ -742,12 +758,17 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * 
 	 * @return
 	 */
-	CollisionMode getCollisionMode() {
+	public CollisionMode getCollisionMode() {
 		return collisionMode;
 	}
 	
-	Set<Entity> getCollisionIgnoreEntities(){
-		return collisionIgnore;
+	/**
+	 * Get a set of the entities this entity will explicitly ignore during collision detection.
+	 * 
+	 * @return
+	 */
+	public Set<Entity> getCollisionIgnoreEntities(){
+		return Collections.unmodifiableSet(collisionIgnore);
 	}
 
 	/**
@@ -764,14 +785,6 @@ public abstract class Entity extends GameObject implements Drawable {
 	 */
 	public boolean isOnGround() {
 		return ground != null;
-	}
-
-	public void ignoreInCollisions(Entity entity){
-		collisionIgnore.add(entity);
-	}
-
-	public void unignoreInCollisions(Entity entity){
-		collisionIgnore.remove(entity);
 	}
 
 	/**
@@ -802,7 +815,9 @@ public abstract class Entity extends GameObject implements Drawable {
 	 */
 	public void setCollisionGroup(int group){
 		if(group < 0) throw new RuntimeException("Cannot set an entity's collision group to a negative namuber.");
+		int oldGroup = collisionGroup;
 		collisionGroup = group;
+		getLevel().updateEntityCollisionGroup(this, oldGroup);
 	}
 
 	/**

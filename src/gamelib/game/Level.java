@@ -2,7 +2,9 @@ package gamelib.game;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import gamelib.Drawable;
 import gamelib.GameManager;
@@ -19,6 +21,8 @@ public abstract class Level implements Updatable, Drawable {
 	private final List<GameObject> gameObjectsToRemove;
 	protected final List<DynamicLight> dLights;	// dynamic Lights
 	protected final List<Light> lights;			// all Lights
+	
+	private final Map<Integer, List<Entity>> collisionGroups;
 	
 	private Camera camera;
 	
@@ -61,6 +65,8 @@ public abstract class Level implements Updatable, Drawable {
 		this.gameObjectsToRemove = new ArrayList<GameObject>();
 		this.dLights = new ArrayList<DynamicLight>();
 		this.lights = new ArrayList<Light>();
+		
+		this.collisionGroups = new HashMap<Integer, List<Entity>>();
 		
 		if (camera == null) {
 			this.camera = new CameraStatic(this);
@@ -179,7 +185,9 @@ public abstract class Level implements Updatable, Drawable {
 		}
 		gameObjects.add(object);
 		if (object instanceof Entity) {
-			entities.add((Entity) object);
+			Entity ent = (Entity) object;
+			entities.add(ent);
+			addEntityToCollisionGroup(ent);
 		}
 	}
 	
@@ -188,6 +196,33 @@ public abstract class Level implements Updatable, Drawable {
 		if(light instanceof DynamicLight) dLights.add((DynamicLight) light);
 	}
 	
+	/**
+	 * Add the given entity to the collision group map.
+	 * 
+	 * @param entity
+	 */
+	private void addEntityToCollisionGroup(Entity entity) {
+		int group = entity.getCollisionGroup();
+		List<Entity> list = collisionGroups.get(group);
+		
+		if (list == null) {
+			list = new ArrayList<Entity>();
+			collisionGroups.put(group, list);
+		}
+		list.add(entity);
+	}
+	
+	/**
+	 * Update the given entity's location in the collision group map.
+	 * 
+	 * @param entity The entity to update
+	 * @param oldGroup The entity's previous collision group
+	 */
+	void updateEntityCollisionGroup(Entity entity, int oldGroup) {
+		collisionGroups.get(oldGroup).remove(entity);
+		addEntityToCollisionGroup(entity);
+	}
+
 	/**
 	 * Get the amount of air friction in the level.
 	 * @return
@@ -213,63 +248,222 @@ public abstract class Level implements Updatable, Drawable {
 	 * TODO increase efficiency
 	 */
 	Entity getGround(Entity entity) {
-		if (entity.getCollisionGroup() == 0) {
+		int group = entity.getCollisionGroup();
+		if (group == 0) {
 			return null;
 		}
-		for (Entity ent : entities) {
-			if(ent == entity) continue;
-			if(!needToCheckCollision(entity, ent)) continue;
-			BoundingBox thisbb = entity.getBoundingBox();
-			BoundingBox otherbb = ent.getBoundingBox();
-			float groundDist = 1F / 12F;//TODO extract
-			if (is3D()) {
-				if (otherbb.contains(new PVector(thisbb.getCenterX(), thisbb.getMaxY() + groundDist, thisbb.getCenterZ()))
-				||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMaxY() + groundDist, thisbb.getMinZ()))
-				||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMaxY() + groundDist, thisbb.getMaxZ()))
-				||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMaxY() + groundDist, thisbb.getMinZ()))
-				||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMaxY() + groundDist, thisbb.getMaxZ()))) {
+		
+		switch (entity.getCollisionMode()) {
+		case LESS_THAN_OR_EQUAL_TO:
+			for (Integer key : collisionGroups.keySet()) {
+				if (key <= group) {
+					for (Entity ent : collisionGroups.get(key)) {
+						if (isGroundEntity(entity, ent)) {
+							return ent;
+						}
+					}
+				}
+			}
+			return null;
+			
+		case GREATER_THAN:
+			for (Integer key : collisionGroups.keySet()) {
+				if (key > group) {
+					for (Entity ent : collisionGroups.get(key)) {
+						if (isGroundEntity(entity, ent)) {
+							return ent;
+						}
+					}
+				}
+			}
+			return null;
+			
+		case EQUAL_TO:
+			for (Entity ent : collisionGroups.get(group)) {
+				if (isGroundEntity(entity, ent)) {
 					return ent;
 				}
-			} else {
-				if (otherbb.contains(new PVector(thisbb.getCenterX(), thisbb.getMinY() - groundDist))
-				||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMinY() - groundDist))
-				||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMinY() - groundDist))) {
-					return ent;
-				}				
 			}
+			return null;
+			
+		default:
+			return null;
 		}
-		return null;
+	}
+	
+	/**
+	 * Test if the posibleGround is the ground entity for entityLookingForGround;
+	 * 
+	 * @param entityLookingForGround
+	 * @param posibleGround
+	 * @return
+	 */
+	private boolean isGroundEntity(Entity entityLookingForGround, Entity posibleGround) {
+		if (posibleGround == entityLookingForGround) {
+			return false;
+		}
+		if (!needToCheckForCollision(entityLookingForGround, posibleGround)) {
+			return false;
+		}
+		
+		BoundingBox thisbb = entityLookingForGround.getBoundingBox();
+		BoundingBox otherbb = posibleGround.getBoundingBox();
+		
+		float groundDist = 1F / 12F;	//TODO extract
+		
+		if (is3D()) {
+			if (otherbb.contains(new PVector(thisbb.getCenterX(), thisbb.getMaxY() + groundDist, thisbb.getCenterZ()))
+			||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMaxY() + groundDist, thisbb.getMinZ()))
+			||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMaxY() + groundDist, thisbb.getMaxZ()))
+			||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMaxY() + groundDist, thisbb.getMinZ()))
+			||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMaxY() + groundDist, thisbb.getMaxZ()))) {
+				return true;
+			}
+		} else {
+			if (otherbb.contains(new PVector(thisbb.getCenterX(), thisbb.getMinY() - groundDist))
+			||  otherbb.contains(new PVector(thisbb.getMinX(),    thisbb.getMinY() - groundDist))
+			||  otherbb.contains(new PVector(thisbb.getMaxX(),    thisbb.getMinY() - groundDist))) {
+				return true;
+			}				
+		}
+		return false;
 	}
 
 	/**
+	 * Test if the given entity will collide with something if moved to the new location.
 	 * Note: This method does collision detection.
+	 * 
 	 * @param entity The entity to move
 	 * @param newLocation The new location that this entity wants to move to
 	 * @return the entity that this entity will collide with if it move to the new location
 	 * TODO increase efficiency
 	 */
-	Entity canMove(Entity entity, PVector newLocation) {
-		if(entity.getCollisionGroup() == 0) return null;
-		for(Entity ent : entities){
-			if(ent == entity) continue;
-			if(!needToCheckCollision(entity, ent)) continue;
-			if(entity.getBoundingBox().intersects(ent.getBoundingBox(), newLocation)){
-				return ent;
+	Entity willCollideWithWhenMoved(Entity entity, PVector newLocation) {
+		int group = entity.getCollisionGroup();
+		if (group == 0) return null;
+		
+		switch (entity.getCollisionMode()) {
+		case LESS_THAN_OR_EQUAL_TO:
+			for (Integer key : collisionGroups.keySet()) {
+				if (key <= group) {
+					for (Entity ent : collisionGroups.get(key)) {
+						if (willCollide(entity, ent, newLocation)) {
+							return ent;
+						}
+					}
+				}
 			}
+			return null;
+			
+		case GREATER_THAN:
+			for (Integer key : collisionGroups.keySet()) {
+				if (key > group) {
+					for (Entity ent : collisionGroups.get(key)) {
+						if (willCollide(entity, ent, newLocation)) {
+							return ent;
+						}
+					}
+				}
+			}
+			return null;
+			
+		case EQUAL_TO:
+			for (Entity ent : collisionGroups.get(group)) {
+				if (willCollide(entity, ent, newLocation)) {
+					return ent;
+				}
+			}
+			return null;
+			
+		default:
+			return null;
 		}
-		return null;
+	}
+
+	/**
+	 * Test if the movingEntity will collide with the stationaryEntity if it moves to desiredLocationOfMovingEntity.
+	 * 
+	 * @param movingEntity
+	 * @param stationaryEntity
+	 * @param desiredLocationOfMovingEntity
+	 * @return
+	 */
+	private boolean willCollide(Entity movingEntity, Entity stationaryEntity, PVector desiredLocationOfMovingEntity) {
+		if (stationaryEntity == movingEntity) {
+			return false;
+		}
+		if (!needToCheckForCollision(movingEntity, stationaryEntity)) {
+			return false;
+		}
+		if (movingEntity.getBoundingBox().intersects(stationaryEntity.getBoundingBox(), desiredLocationOfMovingEntity)) {
+			return true;
+		}
+		return false;
 	}
 	
+	/**
+	 * Test if the given bounding box collides with something.
+	 * 
+	 * @param boundingBox
+	 * @return
+	 */
 	final boolean collidesWithSomething(BoundingBox boundingBox) {
 		Entity entity = boundingBox.getEntity();
+		int group = entity.getCollisionGroup();
 		
-		if(entity.getCollisionGroup() == 0) return true;
-		for(Entity ent : entities){
-			if(ent == entity) continue;
-			if(!needToCheckCollision(entity, ent)) continue;
-			if(boundingBox.intersects(ent.getBoundingBox())){
-				return true;
+		if (group == 0) {
+			return false;
+		}
+		
+		switch (entity.getCollisionMode()) {
+		case LESS_THAN_OR_EQUAL_TO:
+			for (Integer key : collisionGroups.keySet()) {
+				if (key <= group) {
+					for (Entity ent : collisionGroups.get(key)) {
+						return isColliding(entity, ent);
+					}
+				}
 			}
+			return false;
+			
+		case GREATER_THAN:
+			for (Integer key : collisionGroups.keySet()) {
+				if (key > group) {
+					for (Entity ent : collisionGroups.get(key)) {
+						return isColliding(entity, ent);
+					}
+				}
+			}
+			return false;
+			
+		case EQUAL_TO:
+			for (Entity ent : collisionGroups.get(group)) {
+				return isColliding(entity, ent);
+			}
+			return false;
+			
+		default:
+			return false;
+		}
+	}
+
+	/**
+	 * Test if entity1 is colliding with entity2.
+	 * Note: this is not the same as test if entity2 is colliding with entity1.
+	 * 
+	 * @param entity1
+	 * @param entity2
+	 * @return
+	 */
+	public boolean isColliding(Entity entity1, Entity entity2) {
+		if(entity1 == entity2) {
+			return false;
+		}
+		if(!needToCheckForCollision(entity1, entity2)) {
+			return false;
+		}
+		if(entity1.getBoundingBox().intersects(entity2.getBoundingBox())){
+			return true;
 		}
 		return false;
 	}
@@ -284,7 +478,7 @@ public abstract class Level implements Updatable, Drawable {
 	 * Get whether or not the bounding boxes of the entities are being drawn.
 	 * @return
 	 */
-	public final boolean isDrawBoundingBoxes(){
+	public final boolean isDrawingBoundingBoxes(){
 		return drawBoundingBoxes;
 	}
 
@@ -293,7 +487,7 @@ public abstract class Level implements Updatable, Drawable {
 	 * 
 	 * @return
 	 */
-	public final boolean isDrawGrid(){
+	public final boolean isDrawingGrid(){
 		return this.drawGrid;
 	}
 
@@ -406,23 +600,30 @@ public abstract class Level implements Updatable, Drawable {
 	}
 	
 	/**
-	 * Returns whether or not collision detection needs to be done between the two entities
+	 * Returns whether or not collision detection needs to be done between the two entities.
+	 * If false is returned, the two entities are not colliding.
+	 * If true is returned, the two entities <i>might</i> be colliding.
+	 * 
 	 * @param entity1 The entity to check if it can collide with the other one
 	 * @param entity2 The other entity to check against
 	 * @return
 	 */
-	private boolean needToCheckCollision(Entity entity1, Entity entity2) {
-		if(entity2.getCollisionGroup() == 0) return false;
+	private boolean needToCheckForCollision(Entity entity1, Entity entity2) {
+		if (entity1.getCollisionGroup() == 0) {
+			return false;
+		}
 		
-		if(entity1.getCollisionIgnoreEntities().contains(entity2)) return false;
+		if (entity1.getCollisionIgnoreEntities().contains(entity2)) {
+			return false;
+		}
 		
-		switch(entity1.getCollisionMode()){
+		switch (entity1.getCollisionMode()) {
 		case EQUAL_TO:
 			return entity2.getCollisionGroup() == entity1.getCollisionGroup();
-		case GREATER_THAN_OR_EQUAL_TO:
-			return entity2.getCollisionGroup() >= entity1.getCollisionGroup();
-		case LESS_THAN:
-			return entity1.getCollisionGroup() <  entity1.getCollisionGroup();
+		case LESS_THAN_OR_EQUAL_TO:
+			return entity2.getCollisionGroup() <= entity1.getCollisionGroup();
+		case GREATER_THAN:
+			return entity2.getCollisionGroup() >  entity1.getCollisionGroup();
 		default:
 			return false;
 		}
