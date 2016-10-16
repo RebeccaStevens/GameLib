@@ -516,6 +516,15 @@ public abstract class Level implements Updatable, Drawable {
 	}
 
 	/**
+	 * Return the level's active camera.
+	 * 
+	 * @return
+	 */
+	public Camera getCamera() {
+		return camera;
+	}
+
+	/**
 	 * Get the zoom level.
 	 * 
 	 * @return
