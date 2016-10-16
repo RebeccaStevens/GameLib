@@ -3,7 +3,7 @@ package gamelib.game;
 import gamelib.Updatable;
 import processing.core.PVector;
 
-abstract class GameObject implements Updatable {
+public abstract class GameObject implements Updatable {
 
 	private final PVector location;
 	private final PVector velocity;
