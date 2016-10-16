@@ -64,6 +64,7 @@ public abstract class PushableEntity extends Entity {
 	
 	private final void init(float resistance){
 		this.resistance = resistance;
+		setCollisionGroup(1);
 	}
 	
 	public float getResistance(){

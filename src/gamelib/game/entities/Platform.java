@@ -19,7 +19,7 @@ public abstract class Platform extends Entity {
 	}
 	
 	private void init(){
-		setCollisionGroup(2);
+		setCollisionGroup(0);
 		setGroundFriction(10);
 	}
 
