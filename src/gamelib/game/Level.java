@@ -1,12 +1,11 @@
 package gamelib.game;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,11 +27,15 @@ public abstract class Level implements Updatable, Drawable {
 	private final Set<GameObject> gameObjects;
 	private final Set<Entity> entities;
 	private final Collection<Entity> unmodifiableEntities;
+	
+	private final Set<Entity> entitiesToAdd;
+	private final Set<GameObject> gameObjectsToAdd;
 	private final Set<GameObject> gameObjectsToRemove;
+	
 	private final Set<DynamicLight> dLights;	// dynamic Lights
 	private final Set<Light> lights;			// all Lights
 	
-	private final Map<Integer, List<Entity>> collisionGroups;
+	private final Map<Integer, Set<Entity>> collisionGroups;
 	
 	private Camera camera;
 	
@@ -73,11 +76,15 @@ public abstract class Level implements Updatable, Drawable {
 		this.gameObjects = new LinkedHashSet<GameObject>();
 		this.entities = new LinkedHashSet<Entity>();
 		this.unmodifiableEntities = Collections.unmodifiableCollection(entities);
+		
+		this.entitiesToAdd = new LinkedHashSet<Entity>();
+		this.gameObjectsToAdd = new LinkedHashSet<GameObject>();
 		this.gameObjectsToRemove = new LinkedHashSet<GameObject>();
+		
 		this.dLights = new LinkedHashSet<DynamicLight>();
 		this.lights = new LinkedHashSet<Light>();
 		
-		this.collisionGroups = new HashMap<Integer, List<Entity>>();
+		this.collisionGroups = new HashMap<Integer, Set<Entity>>();
 		
 		if (camera == null) {
 			this.camera = new CameraStatic(this);
@@ -95,8 +102,17 @@ public abstract class Level implements Updatable, Drawable {
 	 * 
 	 * @param delta The amount of game time that has passed since the last frame
 	 */
+	@Override
 	public void update(float delta) {
 		preUpdate(delta);
+		if (entitiesToAdd.size() > 0) {
+			addEntities(entitiesToAdd);
+			entitiesToAdd.clear();
+		}
+		if (gameObjectsToAdd.size() > 0) {
+			addGameObjects(gameObjectsToAdd);
+			gameObjectsToAdd.clear();
+		}
 		camera._update(delta);
 		for(GameObject e : gameObjects){
 			e._update(delta);
@@ -192,9 +208,20 @@ public abstract class Level implements Updatable, Drawable {
 	 * @param entity
 	 */
 	void addEntity(Entity entity) {
-		entities.add(entity);
+		entitiesToAdd.add(entity);
 		addEntityToCollisionGroup(entity);
 		addGameObject(entity);
+	}
+
+	/**
+	 * Add all the given GameObjects to the level.
+	 * Note: This method does not check to see if it is safe to do so it just does it.
+	 *       A {@link ConcurrentModificationException} may be thrown else where in the program if this method is called at the wrong time.
+	 * 
+	 * @param toAdd
+	 */
+	protected void addGameObjects(Collection<? extends GameObject> toAdd) {
+		gameObjects.addAll(toAdd);
 	}
 	
 	/**
@@ -203,7 +230,19 @@ public abstract class Level implements Updatable, Drawable {
 	 * @param object
 	 */
 	void addGameObject(GameObject object) {
-		gameObjects.add(object);
+		gameObjectsToAdd.add(object);
+	}
+
+	/**
+	 * Add all the given Entity to the level.
+	 * Note: This method does not check to see if it is safe to do so it just does it.
+	 *       A {@link ConcurrentModificationException} may be thrown else where in the program if this method is called at the wrong time.
+	 * 
+	 * @param toAdd
+	 */
+	protected void addEntities(Collection<? extends Entity> toAdd) {
+		gameObjects.addAll(toAdd);
+		entities.addAll(toAdd);
 	}
 	
 	void addLight(Light light){
@@ -218,13 +257,13 @@ public abstract class Level implements Updatable, Drawable {
 	 */
 	private void addEntityToCollisionGroup(Entity entity) {
 		int group = entity.getCollisionGroup();
-		List<Entity> list = collisionGroups.get(group);
+		Set<Entity> set = collisionGroups.get(group);
 		
-		if (list == null) {
-			list = new ArrayList<Entity>();
-			collisionGroups.put(group, list);
+		if (set == null) {
+			set = new LinkedHashSet<Entity>();
+			collisionGroups.put(group, set);
 		}
-		list.add(entity);
+		set.add(entity);
 	}
 	
 	/**
@@ -651,12 +690,20 @@ public abstract class Level implements Updatable, Drawable {
 	}
 
 	/**
-	 * Remove the all given game objects from the level.
+	 * Remove all the given GameObject from the level.
+	 * Note: This method does not check to see if it is safe to do so it just does it.
+	 *       A {@link ConcurrentModificationException} may be thrown else where in the program if this method is called at the wrong time.
 	 * 
 	 * @param toRemove
 	 */
-	protected void removeGameObjects(Collection<GameObject> toRemove) {
-		gameObjects.removeAll(gameObjectsToRemove);
+	protected void removeGameObjects(Collection<? extends GameObject> toRemove) {
+		for (GameObject go : toRemove) {
+			if (go instanceof Entity) {
+				Entity ent = (Entity) go;
+				collisionGroups.get(ent.getCollisionGroup()).remove(ent);
+			}
+		}
+		gameObjects.removeAll(toRemove);
 		entities.removeAll(toRemove);
 	}
 

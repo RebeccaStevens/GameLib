@@ -21,12 +21,6 @@ public abstract class Level2D extends Level {
 		entityLayer = new HashMap<Entity, Float>();
 		sortedEntities = new TreeSet<Entity>(new EntityLayerComparator());
 	}
-	
-	@Override
-	void addEntity(Entity entity) {
-		super.addEntity(entity);
-		sortedEntities.add(entity);
-	}
 
 	/**
 	 * Set what layer the entity should be drawn on.
@@ -49,9 +43,15 @@ public abstract class Level2D extends Level {
 	protected Collection<Entity> getEntitiesToDraw() {
 		return sortedEntities;
 	}
+	
+	@Override
+	protected void addEntities(Collection<? extends Entity> toAdd) {
+		super.addEntities(toAdd);
+		sortedEntities.addAll(toAdd);
+	}
 
 	@Override
-	protected void removeGameObjects(Collection<GameObject> toRemove) {
+	protected void removeGameObjects(Collection<? extends GameObject> toRemove) {
 		super.removeGameObjects(toRemove);
 		for (GameObject o : toRemove) {
 			if (o instanceof Entity) {
