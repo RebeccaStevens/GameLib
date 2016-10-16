@@ -1,9 +1,11 @@
 package gamelib.game;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * An abstract level for 2D games.
@@ -12,13 +14,21 @@ import java.util.Map;
  */
 public abstract class Level2D extends Level {
 
-	private boolean entitiesNeedResorting;
 	private final Map<Entity, Float> entityLayer;
-	private final EntityLayerComparator entityLayerComparator;
+	private final SortedSet<Entity> sortedEntities;
 	
 	public Level2D(){
 		entityLayer = new HashMap<Entity, Float>();
-		entityLayerComparator = new EntityLayerComparator();
+		sortedEntities = new TreeSet<Entity>(new EntityLayerComparator());
+	}
+	
+	@Override
+	void addGameObject(GameObject object) {
+		super.addGameObject(object);
+		if (object instanceof Entity) {
+			Entity entity = (Entity) object;
+			sortedEntities.add(entity);
+		}
 	}
 
 	/**
@@ -28,18 +38,41 @@ public abstract class Level2D extends Level {
 	 * @param entity
 	 * @param layer
 	 */
-	public void setEntityLayer(Entity entity, float layer){
+	public void setEntityLayer(Entity entity, float layer) {
 		entityLayer.put(entity, layer);
-		entitiesNeedResorting = true;
+		resortEntity(entity);
 	}
-	
+
 	@Override
-	public final void update(float delta){
-		if (entitiesNeedResorting) {
-			Collections.sort(entities, entityLayerComparator);
-			entitiesNeedResorting = false;
-		}
+	public final void update(float delta) {
 		super.update(delta);
+	}
+
+	@Override
+	protected Collection<Entity> getEntitiesToDraw() {
+		return sortedEntities;
+	}
+
+	@Override
+	protected void removeGameObjects(Collection<GameObject> toRemove) {
+		super.removeGameObjects(toRemove);
+		for (GameObject o : toRemove) {
+			if (o instanceof Entity) {
+				sortedEntities.remove(o);
+			}
+		}
+	}
+
+	/**
+	 * Resort an entity in sortedEntities.
+	 * This should be called when an entity's layer is changed.
+	 * 
+	 * @param entity
+	 */
+	private void resortEntity(Entity entity) {
+		if (sortedEntities.remove(entity)) {
+			sortedEntities.add(entity);
+		}
 	}
 
 	@Override
@@ -59,7 +92,16 @@ public abstract class Level2D extends Level {
 			Float v2_obj = entityLayer.get(e2);
 			float v1 = (v1_obj == null) ? 0 : v1_obj;
 			float v2 = (v2_obj == null) ? 0 : v2_obj;
-			return (v1 > v2) ? 1 : (v1 < v2) ? -1 : 0;
+			
+			if (v1 > v2) {
+				return 1;
+			} else if (v1 < v2) {
+				return -1;
+			} else if (e1.equals(e2)) {
+				return 0;
+			} else {
+				return 1;
+			}
 		}
 	}
 }

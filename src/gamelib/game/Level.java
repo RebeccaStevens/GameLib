@@ -2,6 +2,7 @@ package gamelib.game;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,11 +22,11 @@ import processing.core.PVector;
  */
 public abstract class Level implements Updatable, Drawable {
 
-	protected final List<GameObject> gameObjects;
-	protected final List<Entity> entities;
+	private final List<GameObject> gameObjects;
+	private final List<Entity> entities;
 	private final List<GameObject> gameObjectsToRemove;
-	protected final List<DynamicLight> dLights;	// dynamic Lights
-	protected final List<Light> lights;			// all Lights
+	private final List<DynamicLight> dLights;	// dynamic Lights
+	private final List<Light> lights;			// all Lights
 	
 	private final Map<Integer, List<Entity>> collisionGroups;
 	
@@ -55,7 +56,7 @@ public abstract class Level implements Updatable, Drawable {
 	 * @param camera
 	 */
 	public Level(Camera camera){
-		this(null, 16);
+		this(camera, 16);
 	}
 	
 	/**
@@ -98,12 +99,13 @@ public abstract class Level implements Updatable, Drawable {
 		for(DynamicLight l : dLights){
 			l.update(delta);
 		}
-		gameObjects.removeAll(gameObjectsToRemove);
-		entities.removeAll(gameObjectsToRemove);
-		gameObjectsToRemove.clear();
+		if (gameObjectsToRemove.size() > 0) {
+			removeGameObjects(gameObjectsToRemove);
+			gameObjectsToRemove.clear();
+		}
 		postUpdate(delta);
 	}
-	
+
 	/**
 	 * Called each frame before the level updates.
 	 * 
@@ -126,10 +128,10 @@ public abstract class Level implements Updatable, Drawable {
 	public final void draw(PGraphics g) {
 		g.pushMatrix();
 		this.camera.apply(g);
-		for(Light l : this.lights){
+		for (Light l : this.lights) {
 			l.apply(g);
 		}
-		for(Entity e : this.entities){
+		for (Entity e : getEntitiesToDraw()) {
 			e._draw(g);
 		}
 		g.popMatrix();
@@ -177,6 +179,15 @@ public abstract class Level implements Updatable, Drawable {
 	 * @param g The graphics to draw to
 	 */
 	public abstract void drawOverlay(PGraphics g);
+	
+	/**
+	 * Get the collection of entities to draw.
+	 * .
+	 * @return
+	 */
+	protected Collection<Entity> getEntitiesToDraw() {
+		return entities;
+	}
 
 	/**
 	 * Add a GameObjects to the level.
@@ -453,6 +464,13 @@ public abstract class Level implements Updatable, Drawable {
 	}
 
 	/**
+	 * Make this the active level
+	 */
+	public final void makeActive(){
+		GameManager.getMe().getGameScene().setActiveLevel(this);
+	}
+
+	/**
 	 * Test if entity1 is colliding with entity2.
 	 * Note: this is not the same as test if entity2 is colliding with entity1.
 	 * 
@@ -497,6 +515,15 @@ public abstract class Level implements Updatable, Drawable {
 	}
 
 	/**
+	 * Get the zoom level.
+	 * 
+	 * @return
+	 */
+	public float getZoom() {
+		return zoom;
+	}
+
+	/**
 	 * Set the amount of air friction in the level.
 	 * @param airFriction
 	 */
@@ -509,7 +536,7 @@ public abstract class Level implements Updatable, Drawable {
 	 * @param camera
 	 */
 	public void setCamera(Camera camera){
-		this.camera.setLevel(null);
+		this.camera.remove();
 		this.camera = camera;
 		this.camera.setLevel(this);
 	}
@@ -559,15 +586,6 @@ public abstract class Level implements Updatable, Drawable {
 	}
 
 	/**
-	 * Get the zoom level.
-	 * 
-	 * @return
-	 */
-	public float getZoom() {
-		return zoom;
-	}
-
-	/**
 	 * Set the zoom level (must be greater than zero).
 	 * >1 => Zoom In
 	 * <1 => Zoom Out
@@ -584,26 +602,30 @@ public abstract class Level implements Updatable, Drawable {
 	/**
 	 * Remove an entity from the level.
 	 * (To be called from the Entity class)
+	 * 
 	 * @param entity
 	 */
-	public void removeGameObject(GameObject object){
+	void removeGameObject(GameObject object){
 		gameObjectsToRemove.add(object);
 		object.removeLevel();
 	}
-	
+
+	/**
+	 * Remove the all given entities from the level.
+	 * 
+	 * @param toRemove
+	 */
+	protected void removeGameObjects(Collection<GameObject> toRemove) {
+		gameObjects.removeAll(gameObjectsToRemove);
+		entities.removeAll(toRemove);
+	}
+
 	public void removeLight(Light light){
 		light.removeLevel();
 		lights.remove(light);
 		dLights.remove(light);
 	}
 
-	/**
-	 * Make this the active level
-	 */
-	public final void makeActive(){
-		GameManager.getMe().getGameScene().setActiveLevel(this);
-	}
-	
 	/**
 	 * Returns whether or not collision detection needs to be done between the two entities.
 	 * If false is returned, the two entities are not colliding.
