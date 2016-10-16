@@ -1,5 +1,6 @@
 package gamelib.game;
 
+import gamelib.GameManager;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
@@ -13,8 +14,8 @@ public abstract class Camera extends GameObject {
 	public Camera(Level level) {
 		super(level, 0, 0, 0);
 		rotation = new PVector(0, 0, 0);
-		maxAbsoluteLocation = new PVector(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
-		minAbsoluteLocation = new PVector(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+		maxAbsoluteLocation = new PVector(Float.NaN, Float.NaN);
+		minAbsoluteLocation = new PVector(Float.NaN, Float.NaN);
 	}
 
 	void apply(PGraphics g) {
@@ -88,28 +89,28 @@ public abstract class Camera extends GameObject {
 	 * Remove the absolute limits applied to the min x location of this camera.
 	 */
 	public void removeLimitAbsoluteXMin(){
-		minAbsoluteLocation.x = Float.NEGATIVE_INFINITY;
+		minAbsoluteLocation.x = Float.NaN;
 	}
 	
 	/**
 	 * Remove the absolute limits applied to the min y location of this camera.
 	 */
 	public void removeLimitAbsoluteYMin(){
-		minAbsoluteLocation.y = Float.NEGATIVE_INFINITY;
+		minAbsoluteLocation.y = Float.NaN;
 	}
 	
 	/**
 	 * Remove the absolute limits applied to the max x location of this camera.
 	 */
 	public void removeLimitAbsoluteXMax(){
-		maxAbsoluteLocation.x = Float.POSITIVE_INFINITY;
+		maxAbsoluteLocation.x = Float.NaN;
 	}
 	
 	/**
 	 * Remove the absolute limits applied to the max y location of this camera.
 	 */
 	public void removeLimitAbsoluteYMax(){
-		maxAbsoluteLocation.y = Float.POSITIVE_INFINITY;
+		maxAbsoluteLocation.y = Float.NaN;
 	}
 	
 	/**
@@ -130,11 +131,25 @@ public abstract class Camera extends GameObject {
 	
 	@Override
 	public float getXInPixels() {
-		return Math.min(Math.max(super.getXInPixels(), minAbsoluteLocation.x), maxAbsoluteLocation.x);
+		float x = super.getXInPixels();
+		if (!Float.isNaN(minAbsoluteLocation.x)) {
+			x = Math.max(x, minAbsoluteLocation.x);
+		}
+		if (!Float.isNaN(maxAbsoluteLocation.x)) {
+			x = Math.min(x, maxAbsoluteLocation.x);
+		}
+		return x;
 	}
 
 	@Override
 	public float getYInPixels() {
-		return Math.min(Math.max(super.getYInPixels(), minAbsoluteLocation.y), maxAbsoluteLocation.y);
+		float y = super.getYInPixels();
+		if (!Float.isNaN(minAbsoluteLocation.y)) {
+			y = Math.max(y, minAbsoluteLocation.y);
+		}
+		if (!Float.isNaN(maxAbsoluteLocation.y)) {
+			y = Math.min(y, maxAbsoluteLocation.y);
+		}
+		return y;
 	}
 }
