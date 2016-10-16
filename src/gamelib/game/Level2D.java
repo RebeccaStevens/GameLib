@@ -9,9 +9,11 @@ public abstract class Level2D extends Level {
 
 	private boolean entitiesNeedResorting;
 	private final Map<Entity, Float> entityLayer;
+	private final EntityLayerComparator entityLayerComparator;
 	
 	public Level2D(){
 		entityLayer = new HashMap<Entity, Float>();
+		entityLayerComparator = new EntityLayerComparator();
 	}
 
 	public void addGameObject(Entity ent, float layer){
@@ -23,16 +25,7 @@ public abstract class Level2D extends Level {
 	@Override
 	public final void update(float delta){
 		if(entitiesNeedResorting){
-			Collections.sort(entities, new Comparator<Entity>(){
-				@Override
-				public int compare(Entity e1, Entity e2){
-					Float v1_obj = entityLayer.get(e1);
-					Float v2_obj = entityLayer.get(e2);
-					float v1 = (v1_obj == null) ? 0 : v1_obj;
-					float v2 = (v2_obj == null) ? 0 : v2_obj;
-					return (v1 > v2) ? 1 : (v1 < v2) ? -1 : 0;
-				}
-			});
+			Collections.sort(entities, entityLayerComparator);
 			entitiesNeedResorting = false;
 		}
 		super.update(delta);
@@ -41,5 +34,16 @@ public abstract class Level2D extends Level {
 	@Override
 	public final boolean is3D() {
 		return false;
+	}
+	
+	private class EntityLayerComparator implements Comparator<Entity> {
+		@Override
+		public int compare(Entity e1, Entity e2){
+			Float v1_obj = entityLayer.get(e1);
+			Float v2_obj = entityLayer.get(e2);
+			float v1 = (v1_obj == null) ? 0 : v1_obj;
+			float v2 = (v2_obj == null) ? 0 : v2_obj;
+			return (v1 > v2) ? 1 : (v1 < v2) ? -1 : 0;
+		}
 	}
 }
