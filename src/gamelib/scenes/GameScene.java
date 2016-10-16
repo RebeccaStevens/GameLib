@@ -31,10 +31,12 @@ public class GameScene extends Scene {
 
 	@Override
 	public void enter() {
+		GameManager.getMe().getSketch().noCursor();
 	}
 
 	@Override
 	public void leave() {
+		GameManager.getMe().getSketch().cursor();
 	}
 
 	@Override
