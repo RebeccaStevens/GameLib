@@ -14,6 +14,11 @@ import gamelib.scenes.GameScene;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
+/**
+ * An abstract level for either 2D or 3D games.
+ *
+ * @author Rebecca Stevens
+ */
 public abstract class Level implements Updatable, Drawable {
 
 	protected final List<GameObject> gameObjects;
