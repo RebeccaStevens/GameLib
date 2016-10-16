@@ -39,6 +39,19 @@ public abstract class Entity extends GameObject implements Drawable {
 	enum CollisionMode {
 		LESS_THAN_OR_EQUAL_TO, EQUAL_TO, GREATER_THAN;
 	}
+	
+	/**
+	 * Create a 2D Entity.
+	 * 
+	 * @param level The level the entity will exist in
+	 * @param x The x location
+	 * @param y The y location
+	 * @param width The width
+	 * @param height The height
+	 */
+	public Entity(Level level, float x, float y, float width, float height) {
+		this(level, x, y, width, height, PConstants.CENTER);
+	}
 
 	/**
 	 * Create a 2D Entity.
@@ -63,8 +76,34 @@ public abstract class Entity extends GameObject implements Drawable {
 	 * @param height The height
 	 * @param drawMode The draw mode of this entity
 	 */
+	public Entity(Level level, PVector location, float width, float height) {
+		this(level, location, width, height, PConstants.CENTER);
+	}
+	
+	/**
+	 * Create a 2D Entity.
+	 * 
+	 * @param level The level the entity will exist in
+	 * @param location The location of this entity
+	 * @param width The width
+	 * @param height The height
+	 * @param drawMode The draw mode of this entity
+	 */
 	public Entity(Level level, PVector location, float width, float height, int drawMode) {
-		this(level, location.x, location.y, 0, width, 1, height, drawMode);
+		this(level, location.x, location.y, 0, width, height, 0, drawMode);
+	}
+	
+	/**
+	 * Create a 3D Entity.
+	 * 
+	 * @param level The level the entity will exist in
+	 * @param location The location of this entity
+	 * @param width The width
+	 * @param height The height
+	 * @param depth The depth
+	 */
+	public Entity(Level level, PVector location, float width, float height, float depth) {
+		this(level, location, width, height, depth, PConstants.CENTER);
 	}
 	
 	/**
@@ -79,6 +118,21 @@ public abstract class Entity extends GameObject implements Drawable {
 	 */
 	public Entity(Level level, PVector location, float width, float height, float depth, int drawMode) {
 		this(level, location.x, location.y, location.z, width, height, depth, drawMode);
+	}
+	
+	/**
+	 * Create a 3D Entity.
+	 * 
+	 * @param level The level the entity will exist in
+	 * @param x The x location
+	 * @param y The y location
+	 * @param z The z location
+	 * @param width The width
+	 * @param height The height
+	 * @param depth The depth
+	 */
+	public Entity(Level level, float x, float y, float z, float width, float height, float depth) {
+		this(level, x, y, z, width, height, depth, PConstants.CENTER);
 	}
 	
 	/**
