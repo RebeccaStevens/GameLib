@@ -175,7 +175,7 @@ public abstract class Level implements Updatable, Drawable {
 	 */
 	void addGameObject(GameObject object){
 		if (object instanceof Camera) {
-			throw new RuntimeException("Cannot add a camera to the level using addGameObject(GameObject). Instead use setCamera(Camera).");
+			return;
 		}
 		gameObjects.add(object);
 		if (object instanceof Entity) {
